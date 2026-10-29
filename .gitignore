@@ -2,3 +2,10 @@ node_modules/
 dist-app/
 .DS_Store
 Icon?
+
+# Fichiers personnels (restent seulement sur ce Mac)
+SAUVEGARDE-*.json
+IDEE-*.md
+MESSAGE-*.md
+QUESTIONS-*.md
+SCENARIOS-*.md
