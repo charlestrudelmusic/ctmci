@@ -283,6 +283,7 @@ header{flex-wrap:wrap;row-gap:8px}
 .aide .form{font-family:"SF Mono",ui-monospace,Menlo,monospace;background:var(--panel2);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:13px;overflow-x:auto}
 .aide table td,.aide table th{padding:6px 10px}
 .aide kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-size:12px;background:var(--panel2)}
+.f-qui{display:flex;gap:22px;flex-wrap:wrap;font-weight:600;margin-bottom:10px}.f-qui span:first-child{font-size:16px}
 .lnk{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:12.5px}
 /* Étapes */
 .pills{display:flex;gap:6px;flex-wrap:wrap}
@@ -645,14 +646,14 @@ let dernier = null; // dernier cours ajouté (petite animation)
 function render() {
   document.documentElement.style.setProperty('--accent', S.accent);
   if (S.theme === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = S.theme;
-  $('#tabs').innerHTML = [['cours', '1 · Cours'], ['sc', '2 · Scénarios'], ['a26', '3 · Feuilles officielles'], ['aide', 'Aide']]
+  $('#tabs').innerHTML = [['cours', '1 · Cours'], ['sc', '2 · Scénarios'], ['a26', '3 · Feuilles officielles'], ['fiche', 'Ma fiche'], ['aide', 'Aide']]
     .map(([k, t]) => `<button class="${S.tab === k ? 'on' : ''}" data-a="tab" data-k="${k}">${t}</button>`).join('');
   $('#sess').innerHTML = `<button class="on sessb" data-a="sessmenu" title="Changer de session ou en créer une"><span>${esc(ses().nom)}${ses().role ? `<small>${ses().role}</small>` : ''}</span><i>▾</i></button>`;
   $('#theme').innerHTML = [['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre']]
     .map(([k, t]) => `<button class="${S.theme === k ? 'on' : ''}" data-a="theme" data-k="${k}">${t}</button>`).join('');
   const y = scrollY, garde = {};
   document.querySelectorAll('[data-keep]').forEach(e => garde[e.dataset.keep] = e.scrollTop);
-  $('#app').innerHTML = { sc: vueScenarios, cours: vueCours, a26: vueFeuilles, aide: vueAide }[S.tab]();
+  $('#app').innerHTML = { sc: vueScenarios, cours: vueCours, a26: vueFeuilles, fiche: vueFiche, aide: vueAide }[S.tab]();
   scrollTo(0, y);
   document.querySelectorAll('[data-keep]').forEach(e => { if (garde[e.dataset.keep]) e.scrollTop = garde[e.dataset.keep]; });
   noter();
@@ -962,6 +963,24 @@ function etapes(r, sc) {
   return `<div class="steps">${S_.join('')}</div>`;
 }
 
+// ===== Ma fiche d'employé (sans mots de passe : ils vont dans l'app Mots de passe du Mac) =====
+const FICHE = [['nom', 'Nom', 'Prénom Nom'], ['numero', 'Numéro d\'employé', '00000'], ['discipline', 'Ma discipline', '25'], ['courriel', 'Adresse courriel', 'prenom.nom@cegep-lanaudiere.qc.ca'],
+  ['acces', 'Code d\'accès du collège', 'prenom.nom'], ['local', 'Local', 'D-000'], ['casier', 'Numéro de casier', ''], ['poste', 'Poste téléphonique', '0000'], ['photo', 'Code d\'accès photocopieurs', '']];
+function vueFiche() {
+  const f = S.fiche || {};
+  const champ = ([k, lab, ph]) => k === 'discipline'
+    ? `<div class="fld"><label>${lab}</label><select class="inp" data-ch="fiche" data-k="${k}"><option value="">—</option>${Object.entries(DISC).map(([n, v]) => `<option value="${n}" ${f[k] === n ? 'selected' : ''}>${n} · ${esc(v)}</option>`).join('')}</select></div>`
+    : `<div class="fld"><label>${lab}</label><input class="inp" data-ch="fiche" data-k="${k}" value="${esc(f[k] || '')}" placeholder="${esc(ph)}"></div>`;
+  return `<div class="aide"><section class="card" ${cc('fiche-emp')}>${dot('fiche-emp')}
+    <h2>${esc(f.nom || 'Ma fiche')}</h2><div class="sub" style="margin-bottom:16px">Ta fiche d'employé, toujours au même endroit. Le nom, le numéro et la discipline apparaissent aussi en tête de ta feuille.</div>
+    <h3>Informations générales</h3><div class="fld2">${FICHE.slice(0, 5).map(champ).join('')}</div>
+    <h3>Bureau et téléphone</h3><div class="fld2">${FICHE.slice(5, 8).map(champ).join('')}</div>
+    <h3>Photocopie</h3><div class="fld2">${FICHE.slice(8).map(champ).join('')}</div>
+    <div class="fld" style="margin-top:6px"><label>Notes</label><textarea class="inp" rows="3" data-ch="fiche" data-k="notes" placeholder="Autres infos utiles">${esc(f.notes || '')}</textarea></div>
+    <div class="note">🔑 <div>Les <b>mots de passe</b> (boîte vocale, photocopieurs) ne vont pas ici : ctmCI garde tout dans un fichier non protégé, et dans tes sauvegardes. Mets-les plutôt dans l'app <b>Mots de passe</b> du Mac.</div></div>
+  </section></div>`;
+}
+
 // ===== Onglet Aide : comment se calcule la CI =====
 function vueAide() {
   const sec = (t, h) => `<section class="card">${'<h2>' + t + '</h2>' + h}</section>`;
@@ -1026,11 +1045,12 @@ function feuilleHTML(ch) {
     const n = off(c.id).n, et = n == null ? '?' : n * q, pes = n == null ? '?' : fn(n * q * (c.hg || 1));
     return `<tr class="gr"><td>${esc(c.usage || c.titre)}</td><td class="r">${esc(c.discipline || '')}</td><td class="mono">${esc(c.code || c.abbr)}</td><td class="r">${fn(v.h)}</td><td class="r">${fn(c.hp || 0)}</td><td class="r">${q}</td><td class="r">${et}</td><td class="r">${pes}</td><td class="r"><b>${v.inc ? '≥ ' : ''}${f2(v.ci)}</b></td></tr>`;
   })).join('');
-  return `<div class="f-tete"><div><div class="tag">Tâche d'enseignement en musique — ${esc(ses().nom)}</div><h2>${esc(ch.nom)}</h2><div class="sub">Scénario ${noSc(ch)} · mon choix · simulation calculée par l'outil</div></div>${duo(r, 'sm')}</div>
+  const f = S.fiche || {}, qui = [f.nom, f.numero, f.discipline ? 'Discipline : ' + (DISC[f.discipline] || f.discipline) : ''].filter(Boolean);
+  return `${qui.length ? `<div class="f-qui">${qui.map(x => `<span>${esc(x)}</span>`).join('')}</div>` : ''}<div class="f-tete"><div><div class="tag">Tâche d'enseignement en musique — ${esc(ses().nom)}</div><h2>${esc(ch.nom)}</h2><div class="sub">Scénario ${noSc(ch)} · mon choix · simulation calculée par l'outil</div></div>${duo(r, 'sm')}</div>
     ${r.inconnus.length ? `<div class="note warn">◔ <div>Nombre d'étudiants inconnu : <b>${r.inconnus.join(', ')}</b>. Les chiffres marqués « ≥ » sont des minimums.</div></div>` : ''}
     <div style="overflow-x:auto;margin-top:12px"><table class="dept"><thead><tr><th>Cours</th><th class="r">Discipline</th><th>Sigle</th><th class="r">Hc</th><th class="r">Hp</th><th class="r">N. Gr</th><th class="r">N. Ét</th><th class="r">PES</th><th class="r">CIM</th></tr></thead>
     <tbody>${lignes}${r.autres.map(a => `<tr class="aut"><td>${esc(a.nom)}</td><td colspan="7" class="sub">CI fixe</td><td class="r"><b>${f2(a.ci)}</b></td></tr>`).join('')}</tbody>
-    <tfoot><tr><td colspan="3">Facteur HP : <b>${fn(r.F)}</b></td><td class="r"><b>${fn(r.heures)}</b></td><td colspan="4" class="sub">total heures</td><td></td></tr>
+    <tfoot><tr><td colspan="3">Facteur HP : <b>${r.nPrep ? fn(r.F) : '—'}</b></td><td class="r"><b>${fn(r.heures)}</b></td><td colspan="4" class="sub">total heures</td><td></td></tr>
       <tr class="tot"><td colspan="8" class="r">CIM totale</td><td class="r">${r.inconnus.length ? '≥ ' : ''}${f2(r.ci)}</td></tr>
       <tr><td colspan="8" class="r">% de tâche</td><td class="r">${r.inconnus.length ? '≥ ' : ''}${fn(Math.round(r.ci / S.cible * 100))}</td></tr>
       ${autresAnnee().length ? `<tr class="an"><td colspan="8" class="r">CI année (${esc(ses().annee)})${autresAnnee().some(x => x.ci == null) ? ' · une session pas encore choisie' : ''}</td><td class="r">${r.inconnus.length ? '≥ ' : ''}${f2(ciAnnee(r))}</td></tr><tr class="an"><td colspan="8" class="r">% de tâche année</td><td class="r">${r.inconnus.length ? '≥ ' : ''}${fn(Math.round(ciAnnee(r) / (2 * S.cible) * 100))} %</td></tr>` : ''}
@@ -1263,6 +1283,7 @@ document.addEventListener('change', e => {
   else if (d.ch === 'autval') { const a = sc.autres[+d.i]; a[a.unite === 'pct' ? 'pct' : 'ci'] = num(t.value) ?? ''; }
   else if (d.ch === 'onum') { const c = cours(d.k), o = off(d.k), f = c.type === 'collectif' ? 'gr' : 'n', v = Math.round(num(t.value)); if (v >= 1) o[f] = v; }
   else if (d.ch === 'qte') { const c = cours(d.k), v = Math.round(num(t.value)); if (!isNaN(v)) { sc.sel[d.k] = Math.max(0, Math.min(maxDe(c), v)); if (!sc.sel[d.k] && c.lien) sc.sel[c.lien] = 0; } }
+  else if (d.ch === 'fiche') { (S.fiche = S.fiche || {})[d.k] = t.value.trim(); }
   else if (d.ch === 'scnom') sc.nom = t.value;
   else if (d.ch === 'fmode') sc.fMode = t.value;
   else if (d.ch === 'fman') sc.fManuel = num(t.value) ?? '';
