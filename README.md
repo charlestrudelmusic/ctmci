@@ -16,6 +16,7 @@ Les calculs sont vérifiés sur des feuilles officielles du département (`npm t
 
 ## Utiliser
 
+- **En ligne** : https://charlestrudelmusic.github.io/ctmci/
 - **Dans un navigateur** : ouvrir `ctmCI.html` (Safari, Chrome…). Les données restent dans le navigateur ; « Sauvegarder » crée un fichier.
 - **App Mac** : `npm install`, puis `npm start`. Les données sont dans `~/Library/Application Support/ctmCI/`.
 
