@@ -384,6 +384,8 @@ tr.tot td{font-weight:650;border-top:1.5px solid var(--line);border-bottom:0}
 <div class="toast" id="toast"></div>
 <div class="apercu" id="apercu"></div>
 
+<!-- Version en ligne seulement : exemple chargé quand il n'y a encore aucune donnée (absent de l'app Mac) -->
+<script>if (!window.ctmciApp && /github\.io$/.test(location.hostname)) document.write('<script src="exemple.js"><\/script>');</script>
 <script>
 // <calcul> ===== Calcul pur (sans écran) — Annexe I-1, FNEEQ 2023-2028 =====
 const CI = {
@@ -503,7 +505,7 @@ const DEFAUT = () => ({ v: 2, tab: 'cours', theme: 'dark', sombreParDefaut: true
 const anneeDe = nom => { const m = /(automne|hiver|été)\s*(\d{4})/i.exec(nom || ''); if (!m) return ''; const y = +m[2]; return /automne/i.test(m[1]) ? `${y}-${y + 1}` : `${y - 1}-${y}`; };
 let S;
 const lireBrut = () => { try { if (window.ctmciApp) { const t = window.ctmciApp.lire(); if (t) return t; } } catch (e) {} try { return localStorage.getItem(CLE); } catch (e) { return null; } };
-try { const o = JSON.parse(lireBrut() || 'null'); S = o && o.v === 2 ? Object.assign(DEFAUT(), o) : DEFAUT(); } catch (e) { S = DEFAUT(); }
+try { const o = JSON.parse(lireBrut() || 'null'); const x = o && o.v === 2 ? o : window.CTMCI_EXEMPLE; S = x ? Object.assign(DEFAUT(), JSON.parse(JSON.stringify(x))) : DEFAUT(); } catch (e) { S = DEFAUT(); }
 S.sessions.forEach(x => { if (x.verrou === undefined) x.verrou = true; if (x.annee === undefined) x.annee = anneeDe(x.nom); });
 // Feuilles A26 du département (26 sept.) : cours du programme et sigles observés
 if (!S.maj4) {
