@@ -286,6 +286,8 @@ header{flex-wrap:wrap;row-gap:8px}
 .f-qui{display:flex;gap:22px;flex-wrap:wrap;font-weight:600;margin-bottom:10px}.f-qui span:first-child{font-size:16px}
 .garde .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600}
 .garde .expl{flex:1;min-width:240px}.garde .ciaut{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.themeb{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
+.themeb:hover{color:var(--text);border-color:var(--faint)}
 .lnk{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:12.5px}
 /* Étapes */
 .pills{display:flex;gap:6px;flex-wrap:wrap}
@@ -372,7 +374,7 @@ tr.tot td{font-weight:650;border-top:1.5px solid var(--line);border-bottom:0}
   <div class="seg" id="sess" title="Session"></div>
   <div class="seg" id="sauv"><button data-a="sauver" title="Sauvegarder toutes tes données dans un fichier (⌘S)">⤓<span class="txt"> Sauvegarder</span></button><button data-a="recup" title="Récupérer un fichier de sauvegarde (⌘O)">⤒<span class="txt"> Récupérer</span></button></div>
   <input type="file" id="fichier" accept=".json,application/json" hidden>
-  <div class="seg" id="theme"></div>
+  <div id="theme"></div>
   <button class="dot" style="position:static;opacity:1;width:16px;height:16px;background:var(--accent)" data-a="pop" data-k="accent" title="Couleur principale"></button>
 </header>
 <main id="app"></main>
@@ -670,8 +672,8 @@ function render() {
   $('#tabs').innerHTML = [['cours', '1 · Cours'], ['sc', '2 · Scénarios'], ['a26', '3 · Feuilles officielles'], ['fiche', 'Ma fiche'], ['aide', 'Aide']]
     .map(([k, t]) => `<button class="${S.tab === k ? 'on' : ''}" data-a="tab" data-k="${k}">${t}</button>`).join('');
   $('#sess').innerHTML = `<button class="on sessb" data-a="sessmenu" title="Changer de session ou en créer une"><span>${esc(ses().nom)}${ses().role ? `<small>${ses().role}</small>` : ''}</span><i>▾</i></button>`;
-  $('#theme').innerHTML = [['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre']]
-    .map(([k, t]) => `<button class="${S.theme === k ? 'on' : ''}" data-a="theme" data-k="${k}">${t}</button>`).join('');
+  const sombre = S.theme === 'dark' || (S.theme === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  $('#theme').innerHTML = `<button class="themeb" data-a="theme" data-k="${sombre ? 'light' : 'dark'}" title="${sombre ? 'Passer en mode clair' : 'Passer en mode sombre'}"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 2a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>`;
   const y = scrollY, garde = {};
   document.querySelectorAll('[data-keep]').forEach(e => garde[e.dataset.keep] = e.scrollTop);
   $('#app').innerHTML = { sc: vueScenarios, cours: vueCours, a26: vueFeuilles, fiche: vueFiche, aide: vueAide }[S.tab]();
