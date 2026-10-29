@@ -1,0 +1,1265 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ctmCI</title>
+<script>
+try{const o=JSON.parse((window.ctmciApp&&window.ctmciApp.lire())||localStorage.getItem('ctmci-v2')||'{}');const t=o.sombreParDefaut?o.theme:'dark';if(t&&t!=='auto')document.documentElement.dataset.theme=t;}catch(e){}
+</script>
+<style>
+:root{
+  --bg:#f4f5f7;--panel:#fff;--panel2:#f8f9fb;--line:#e5e7eb;--line2:#eef0f3;
+  --text:#14161a;--muted:#667085;--faint:#98a2b3;
+  --accent:#5b6cff;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--info:#2563eb;
+  --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.05);
+  --r:16px;color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1014;--panel:#161920;--panel2:#1b1f27;--line:#2a2f39;--line2:#22262e;
+  --text:#e9ebef;--muted:#9aa3b2;--faint:#687182;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.25);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1014;--panel:#161920;--panel2:#1b1f27;--line:#2a2f39;--line2:#22262e;
+  --text:#e9ebef;--muted:#9aa3b2;--faint:#687182;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.25);color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+.num,.mono{font-variant-numeric:tabular-nums}
+.mono{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:12.5px}
+/* En-tête */
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:12px 24px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line2)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:-.01em;font-size:15px}
+.logo{width:26px;height:26px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+.tabs{display:flex;gap:2px;background:var(--panel2);border:1px solid var(--line);padding:3px;border-radius:11px}
+.tabs{max-width:100%;overflow-x:auto}.tabs button{white-space:nowrap;border:0;background:none;padding:6px 13px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500}
+.tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.sp{flex:1}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:var(--panel);padding:5px 10px;cursor:pointer;color:var(--muted);font-size:12.5px}
+.seg button.on{background:var(--panel2);color:var(--text);font-weight:600}
+main{max-width:1240px;margin:0 auto;padding:24px}
+/* Cartes */
+.card{position:relative;background:var(--panel);border:1.5px solid var(--cc,var(--line));border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow)}
+.dot{position:absolute;top:12px;right:12px;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--panel);outline:1px solid var(--line);background:var(--cc,conic-gradient(#f87171,#fbbf24,#4ade80,#60a5fa,#c084fc,#f87171));cursor:pointer;opacity:.45;transition:.15s;padding:0}
+.card:hover>.dot,.dot:focus-visible{opacity:1;transform:scale(1.15)}
+h2{margin:0 0 2px;font-size:16px;font-weight:650;letter-spacing:-.01em}
+h3{margin:18px 0 8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600}
+.sub{color:var(--muted);font-size:13px}
+.grid{display:grid;gap:18px}
+.cols{grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}
+/* Scénario */
+.big{display:flex;align-items:baseline;gap:8px;margin:14px 0 6px}
+.big b{font-size:40px;font-weight:680;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.big span{color:var(--muted)}
+.bar{height:8px;border-radius:99px;background:var(--line2);overflow:hidden;position:relative}
+.bar i{display:block;height:100%;background:var(--cc,var(--accent));border-radius:99px;transition:width .3s}
+.bar.over i{background:var(--ok)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stat{background:var(--panel2);border-radius:11px;padding:9px 11px}
+.stat small{display:block;color:var(--faint);font-size:11px}
+.stat b{font-size:16px;font-weight:620;font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line2)}
+.row:last-child{border-bottom:0}
+.row .nm{flex:1;min-width:0}
+.row .nm b{font-weight:560}
+.row .nm small{display:block;color:var(--faint);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.step button{width:26px;height:26px;border:0;background:var(--panel);cursor:pointer;color:var(--muted);font-size:15px}
+.step button:hover{background:var(--panel2);color:var(--text)}
+.step button:disabled{opacity:.3;cursor:default}
+.step span{min-width:44px;text-align:center;font-variant-numeric:tabular-nums;font-size:13px}
+.step span em{font-style:normal;color:var(--faint)}
+.tog{position:relative;width:34px;height:20px;border-radius:99px;background:var(--line);border:0;cursor:pointer;transition:.2s;flex:none}
+.tog::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:.2s}
+.tog.on{background:var(--accent)}.tog.on::after{left:16px}
+.tog:disabled{opacity:.55;cursor:default}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 7px;border-radius:99px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);white-space:nowrap}
+.b-officiel{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 35%,transparent);background:color-mix(in srgb,var(--ok) 8%,transparent)}
+.b-observe{color:var(--info);border-color:color-mix(in srgb,var(--info) 35%,transparent);background:color-mix(in srgb,var(--info) 8%,transparent)}
+.b-estime{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent);background:color-mix(in srgb,var(--warn) 8%,transparent)}
+.b-inconnu{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 30%,transparent);background:color-mix(in srgb,var(--bad) 6%,transparent)}
+.note{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;padding:10px 12px;border-radius:11px;margin-top:10px;background:var(--panel2);color:var(--muted)}
+.note.warn{background:color-mix(in srgb,var(--warn) 9%,var(--panel));color:color-mix(in srgb,var(--warn) 70%,var(--text))}
+.note.bad{background:color-mix(in srgb,var(--bad) 8%,var(--panel));color:color-mix(in srgb,var(--bad) 70%,var(--text))}
+.note.ok{background:color-mix(in srgb,var(--ok) 9%,var(--panel));color:color-mix(in srgb,var(--ok) 70%,var(--text))}
+.inp{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 8px;width:100%}
+.inp:focus{outline:2px solid color-mix(in srgb,var(--accent) 40%,transparent);border-color:var(--accent)}
+.inp.sm{width:64px;text-align:right}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:6px 12px;cursor:pointer;font-weight:520}
+.btn:hover{background:var(--panel2)}
+.btn.pri{background:var(--accent);color:#fff;border-color:transparent}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted)}
+.btn.ghost:hover{color:var(--text);background:var(--panel2)}
+.ttl-in{flex:1;min-width:0;border:0;background:none;font-size:16px;font-weight:650;letter-spacing:-.01em;padding:3px 6px;border-radius:7px}
+.ttl-in:hover{background:var(--panel2)}.ttl-in:focus{outline:2px solid color-mix(in srgb,var(--accent) 40%,transparent);background:var(--panel)}
+.sctabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.sct{display:flex;align-items:center;gap:8px;border:1.5px solid var(--cc,var(--line));background:var(--panel);border-radius:12px;padding:7px 12px;cursor:pointer;color:var(--muted);transition:.15s;max-width:300px}
+.sct:hover{color:var(--text)}
+.sct.on{color:var(--text);box-shadow:0 0 0 3px color-mix(in srgb,var(--cc,var(--accent)) 22%,transparent);border-color:var(--cc,var(--accent))}
+.sct .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:540}
+.sct .ci{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--faint)}
+.sct.on .ci{color:var(--accent);font-weight:600}
+.sct.add{width:34px;justify-content:center;font-size:18px;padding:5px 0;border-style:dashed}
+.no{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--muted)}
+.sct.on .no{background:var(--cc,var(--accent));border-color:transparent;color:#fff}
+.star{color:#eab308}
+table.cmp td,table.cmp th{white-space:nowrap}
+table.cmp th{border-bottom:2px solid var(--cc,var(--line));text-transform:none;letter-spacing:0;font-size:13px;color:var(--text)}
+table.cmp tr.sec td{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600;padding-top:16px;border-bottom:1px solid var(--line)}
+table.cmp tr.hl td{background:var(--panel2)}
+.big2{font-size:18px}
+.mi{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 10px;border-radius:8px;cursor:pointer}
+.mi:hover{background:var(--panel2)}
+.sep{height:1px;background:var(--line2);margin:5px 0}
+:root{--c-princ:var(--accent);--c-comp:#14b8a6;--c-grp:#f59e0b;--c-labo:#ec4899}
+.hero-in{display:flex;align-items:center;gap:28px;margin-top:14px;flex-wrap:wrap}
+.pctbig{display:flex;align-items:baseline;gap:2px;flex-wrap:wrap;min-width:150px}
+.pctbig b{font-size:60px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.pctbig span{font-size:24px;font-weight:600;color:var(--muted)}
+.pctbig small{width:100%;color:var(--faint);font-size:12px;margin-top:2px}
+.hbar{position:relative;height:20px;border-radius:99px;background:var(--line2);display:flex;margin-top:18px}
+.hbar .seg{display:block;height:100%;transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.hbar .seg:first-child{border-radius:99px 0 0 99px}
+.hbar .ghost{width:0;background:repeating-linear-gradient(45deg,var(--cat,var(--accent)) 0 4px,transparent 4px 8px);opacity:.7;border-radius:0 99px 99px 0}
+.hbar .mark{position:absolute;top:-7px;bottom:-7px;width:2px;background:var(--text);opacity:.55;border-radius:2px}
+.hbar .mark em{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-style:normal;font-size:10.5px;font-weight:600;white-space:nowrap}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.hstats{display:flex;gap:18px}.hstats small{display:block;color:var(--faint);font-size:11px}.hstats b{font-size:17px}
+.builder{display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
+@media (max-width:820px){.builder{grid-template-columns:1fr}}
+.zone-offre{position:sticky;top:124px;max-height:calc(100vh - 140px);overflow:auto}
+.off{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-left:3px solid var(--cat);border-radius:11px;margin-bottom:6px;cursor:grab;background:var(--panel);transition:transform .15s,border-color .15s;user-select:none}
+.off:hover{transform:translateX(3px);border-color:var(--cat)}
+.off:active{cursor:grabbing}
+.off.vide{opacity:.4;cursor:default;transform:none}
+.off .grip{color:var(--faint);font-size:13px}
+.off .nm,.tile .nm{flex:1;min-width:0}
+.off small,.tile small{display:block;color:var(--faint);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.off .d{font-size:13px;font-weight:650;color:var(--ok);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.off .d small{color:var(--faint);font-weight:500;text-align:right}
+.fx{font-size:11.5px;color:var(--warn);margin:-2px 0 8px 32px}
+.pips{display:flex;gap:3px;margin-top:5px;flex-wrap:wrap}.pips i{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--cat)}.pips i.x{background:var(--cat)}
+.zone-tache{min-height:420px}
+.over{outline:2px dashed var(--accent);outline-offset:3px;background:color-mix(in srgb,var(--accent) 5%,var(--panel))}
+.vide-z{display:grid;place-items:center;height:260px;border:2px dashed var(--line);border-radius:14px;color:var(--faint);margin-top:14px}
+.tile{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:var(--panel2);border-left:4px solid var(--cat);margin-bottom:7px;cursor:grab}
+.tile .v{font-weight:650;font-variant-numeric:tabular-nums;min-width:58px;text-align:right}
+.tile .x{border:0;background:none;color:var(--faint);font-size:18px;cursor:pointer;padding:0 2px}.tile .x:hover{color:var(--bad)}
+.tile .eff{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
+.tile .eff .inp{width:48px}
+.tile.neu{animation:neu .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes neu{0%{transform:translateX(-14px);opacity:.3;background:color-mix(in srgb,var(--cat) 30%,var(--panel2))}100%{transform:none;opacity:1}}
+.fline{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);padding:4px 2px 8px}.fline span{flex:1}
+.dep{display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;cursor:pointer;width:100%;text-align:left}
+.dep>span:first-child{color:var(--faint);width:12px}
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+@media (max-width:1000px){.board{grid-template-columns:1fr}}
+.colh{display:flex;align-items:center;gap:12px;padding-right:16px}
+.cn{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);font-weight:700;color:var(--muted)}
+.brow{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-left:3px solid var(--cat);border-radius:11px;margin-bottom:6px;background:var(--panel);cursor:grab;user-select:none;transition:border-color .15s}
+.brow:hover{border-color:var(--cat)}
+.brow .nm{flex:1;min-width:0}
+.brow small{display:block;color:var(--faint);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brow .v{font-weight:650;min-width:52px;text-align:right}
+.orow{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+.acts{display:flex;flex-direction:column;gap:4px;align-items:stretch}
+.btn{white-space:nowrap}
+.mini{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:4px 9px;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--accent);font-weight:560}
+.mini:hover{background:var(--panel2)}.mini:disabled{opacity:.35;cursor:default}
+.mini.ghost{color:var(--muted);border-color:transparent}
+.lock{border:0;background:none;cursor:pointer;opacity:.25;padding:0 2px;font-size:12px;filter:grayscale(1)}
+.lock.on{opacity:1;filter:none}
+.mini-j{display:flex;align-items:baseline;gap:10px;margin:8px 0 2px}.mini-j b{white-space:nowrap;font-size:28px;font-weight:700;letter-spacing:-.02em}
+.addb{display:flex;flex-direction:column;align-items:flex-end;border:1px solid color-mix(in srgb,var(--ok) 35%,transparent);background:color-mix(in srgb,var(--ok) 7%,var(--panel));color:var(--ok);border-radius:9px;padding:4px 9px;cursor:pointer;white-space:nowrap;font-weight:600;font-size:12.5px}
+.addb small{font-weight:500;font-size:11px;color:var(--ok);opacity:.85}
+.addb:hover{background:color-mix(in srgb,var(--ok) 14%,var(--panel))}
+#sess button{display:flex;flex-direction:column;align-items:center;line-height:1.15}
+#sess small{font-size:9.5px;color:var(--faint);font-weight:500}
+body[data-glisse="off"] .zone-tache,body[data-glisse="tache"] .zone-offre,body[data-glisse="prog"] [data-zone="offre"],body[data-glisse="offre"] [data-zone="prog"],body[data-glisse="offre"] [data-zone="prends"],body[data-glisse="prends"] [data-zone="offre"]{outline:2px dashed color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:3px}
+.brow.fini{opacity:.5}
+.brow.edit{cursor:grab}
+.okc{color:var(--ok);font-weight:700;padding:0 6px}
+.dispo{display:flex;align-items:center;gap:8px;margin-top:5px;font-size:11.5px;color:var(--muted)}.dispo .pips{margin:0}
+.lockb{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:7px 11px;margin:12px 0 4px;cursor:pointer;color:var(--muted);font-size:12.5px}
+.lockb u{color:var(--accent);text-decoration:none;font-weight:600}
+.lockb:not(.on){border-color:var(--warn);color:var(--warn);background:color-mix(in srgb,var(--warn) 8%,var(--panel))}
+.card.modif{border-color:color-mix(in srgb,var(--warn) 55%,transparent)}
+.hint{font-size:12px;color:var(--faint);margin:6px 0 2px}
+.tagb{border:1px dashed var(--line);background:none;border-radius:99px;padding:1px 8px;font-size:11px;color:var(--faint);cursor:pointer}
+.tagb.on{border-style:solid;color:var(--text);background:var(--panel2)}
+.brow .x{border:0;background:none;color:var(--faint);font-size:18px;cursor:pointer;padding:0 2px}.brow .x:hover{color:var(--bad)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:80}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.garde{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--muted)}
+.garde label{display:flex;align-items:center;gap:6px}.garde .inp{width:56px}
+.hbar .mark.faint{opacity:.2}.hbar .mark.faint em{top:auto;bottom:-17px}
+.step.vide{border:0;width:0}
+.eff.ligne{margin-top:6px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.eff.ligne .inp{width:52px;padding:3px 6px}
+.brow .nm b{white-space:nowrap}
+.step .plein{width:26px;text-align:center;font-style:normal;color:var(--ok);font-size:12px}
+.step span{min-width:58px}
+.hacts{display:flex;gap:6px;flex-wrap:wrap}
+.hb{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 10px;font-size:12.5px;cursor:pointer;color:var(--muted);white-space:nowrap}
+.hb:hover{color:var(--text);background:var(--panel2)}
+.hb.on{color:#eab308;border-color:color-mix(in srgb,#eab308 50%,transparent);background:color-mix(in srgb,#eab308 10%,var(--panel))}
+.hb.del:hover{color:var(--bad);border-color:var(--bad)}
+.brow.neu{animation:neu .6s cubic-bezier(.2,.8,.2,1)}
+.bref{list-style:none;padding:12px 14px;margin:12px 0 16px;background:var(--panel2);border-radius:12px;display:grid;gap:6px;font-size:13.5px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.ccard{border:1.5px solid var(--cc,var(--line));border-radius:14px;padding:14px 16px;background:var(--panel2);display:grid;gap:8px}
+.ccard.ret{box-shadow:0 0 0 2px color-mix(in srgb,#eab308 60%,transparent)}
+.ccard .ch{display:flex;align-items:center;gap:8px}
+.cpct b{font-size:34px;font-weight:700;letter-spacing:-.03em}
+.ccard .cl{font-size:12.5px;color:var(--muted)}
+.ccard .cb{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px}
+.hbar.sm{height:10px;margin-top:0}.hbar.sm .mark{top:-4px;bottom:-4px}
+table.cmp tr.same td{opacity:.45}
+table.cmp tr.diff td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.board.pr{grid-template-columns:52px repeat(2,minmax(0,1fr))}
+.replie{padding:14px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:12px;min-height:240px}
+.replie:hover{border-color:var(--accent)}
+.vtxt{writing-mode:vertical-rl;color:var(--muted);font-weight:600;letter-spacing:.02em}
+@media (max-width:1000px){.board.pr{grid-template-columns:1fr}.replie{min-height:0;flex-direction:row;padding:12px 16px}.vtxt{writing-mode:horizontal-tb}}
+.vseg{display:inline-flex;margin:10px 0 2px}.vseg button{font-size:12px}
+.blk-l{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0 10px;font-size:12px;color:var(--muted)}
+.blk-l b{color:var(--text);font-size:14px}
+.blk-l i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.blocs{display:flex;flex-wrap:wrap;gap:6px}
+.blk{--u:66px;width:calc(var(--h) * var(--u) + (var(--h) - 1) * 6px);height:66px;border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;justify-content:space-between;
+  background:color-mix(in srgb,var(--cat) 20%,var(--panel2));border:1px solid color-mix(in srgb,var(--cat) 55%,transparent);border-top:3px solid var(--cat)}
+.blk b{font-size:12.5px;line-height:1.1}
+.blk small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk em{font-style:normal;font-size:11px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.blk.neu{animation:neu .6s cubic-bezier(.2,.8,.2,1)}
+.duo{display:flex;gap:26px;align-items:flex-end;flex:none}
+.duo>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px}
+.duo b{font-size:56px;font-weight:700;letter-spacing:-.04em;line-height:1;white-space:nowrap}
+.duo span{font-size:22px;font-weight:600;color:var(--muted)}
+.duo small{width:100%;color:var(--faint);font-size:11.5px;margin-top:3px}
+.duo>div+div{padding-left:26px;border-left:1px solid var(--line)}
+.duo.sm{gap:18px;margin-top:8px}.duo.sm b{font-size:32px}.duo.sm span{font-size:15px}.duo.sm>div+div{padding-left:18px}
+.sctabs{position:sticky;top:64px;z-index:15;background:var(--bg);padding:10px 0;margin:-10px 0 8px}
+.choix{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--ok);color:#fff;white-space:nowrap}
+button.choix{border:0;cursor:pointer}.choix.gros{font-size:12.5px;padding:5px 12px}
+.board.deux{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
+.board.deux.pr{grid-template-columns:52px minmax(0,1fr)}
+.brow.fixe{cursor:default}.brow .qte{font-size:12px;color:var(--muted);white-space:nowrap}
+.titre-sec{margin:28px 0 12px}
+.f-tete{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;padding-bottom:12px;border-bottom:3px solid var(--text)}
+table.dept th{color:var(--text);font-size:11.5px}
+table.dept td,table.dept th{white-space:nowrap}
+table.dept td.gris{background:var(--panel2)}
+table.dept tr.gr td{background:color-mix(in srgb,var(--c-grp) 10%,transparent)}
+table.dept tfoot td{border-bottom:0;padding-top:8px}
+table.dept tfoot tr.tot td{font-size:16px;font-weight:700;border-top:1.5px solid var(--line)}
+.brow.aut{cursor:default;gap:10px}.brow.aut>.inp{flex:1;min-width:0}.brow.aut>.inp.sm{flex:none;width:64px}
+.autadd{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}
+table.dept tr.aut td{background:color-mix(in srgb,#a78bfa 10%,transparent)}
+table.dept tr.an td{color:var(--muted);padding-top:2px;padding-bottom:2px}
+.garde .seg button{font-size:12px;padding:4px 10px}
+#sess .sessb{display:flex;flex-direction:row;align-items:center;gap:8px}.sessb i{font-style:normal;color:var(--faint);font-size:11px}
+.sessb span{display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.mi.on{font-weight:600}
+.ns{display:flex;gap:6px;padding:4px 6px 6px}.ns .inp{flex:1}
+.brow.aut .conv{font-size:12px;color:var(--muted);white-space:nowrap;min-width:72px}
+.lnk{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:12.5px}
+/* Étapes */
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--panel);padding:5px 12px;border-radius:99px;cursor:pointer;color:var(--muted);font-size:13px}
+.pill.on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);font-weight:560}
+.steps{margin-top:14px}
+.st{display:grid;grid-template-columns:30px 1fr auto;gap:12px;align-items:start;padding:12px 0;border-bottom:1px dashed var(--line)}
+.st:last-child{border:0}
+.st .n{width:24px;height:24px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--muted)}
+.st .t{font-weight:560}
+.st .f{color:var(--muted);margin-top:3px}
+.st .v{font-weight:640;font-variant-numeric:tabular-nums;font-size:15px;text-align:right;white-space:nowrap}
+.st.tot .v{font-size:20px;color:var(--accent)}
+.ftab{display:inline-flex;gap:4px;margin-top:6px}
+.ftab span{font-size:11.5px;padding:2px 8px;border-radius:7px;background:var(--panel2);color:var(--faint);border:1px solid transparent}
+.ftab span.on{color:var(--accent);border-color:var(--accent);font-weight:600}
+/* Catalogue */
+.cat-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cat-h .count{color:var(--faint);font-size:12.5px}
+.crow{display:grid;grid-template-columns:110px 1fr 90px 120px 20px;gap:12px;align-items:center;padding:9px 10px;margin:0 -10px;border-radius:10px;cursor:pointer}
+.crow:hover{background:var(--panel2)}
+.crow .code{font-weight:600}
+.crow .code small{display:block;font-weight:400;color:var(--faint);font-size:11px}
+.crow .ttl small{display:block;color:var(--faint);font-size:11.5px}
+.crow .chev{color:var(--faint)}
+.search{max-width:280px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line2)}
+td.r,th.r{text-align:right}
+tr.tot td{font-weight:650;border-top:1.5px solid var(--line);border-bottom:0}
+/* Tiroir */
+.scrim{position:fixed;inset:0;background:rgba(10,12,16,.28);z-index:40;opacity:0;pointer-events:none;transition:.2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100vw);background:var(--panel);border-left:1px solid var(--line);z-index:41;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);overflow:auto;padding:22px 24px;box-shadow:-20px 0 40px rgba(0,0,0,.08)}
+.drawer.on{transform:none}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:520}
+.fld2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grp{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+/* Pastille couleur */
+.pop{position:fixed;z-index:60;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:12px;width:244px;display:none}
+.pop.on{display:block}
+.sw{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
+.sw button{aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;padding:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.sw button:hover{transform:scale(1.18)}
+.pop .foot{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line2)}
+.pop input[type=color]{width:28px;height:28px;border:0;padding:0;background:none;cursor:pointer}
+.q{display:grid;grid-template-columns:24px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line2)}
+.q.done .qt{color:var(--faint);text-decoration:line-through}
+.q textarea{margin-top:6px;min-height:34px;resize:vertical}
+.tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600}
+@media (max-width:760px){header{flex-wrap:wrap;padding:10px 16px}main{padding:16px}.crow{grid-template-columns:80px 1fr 20px}.crow .hide-s{display:none}.stats{grid-template-columns:1fr 1fr 1fr}}
+@media print{header,.dot,.btn,.lnk{display:none!important}body{background:#fff}.card{box-shadow:none;break-inside:avoid}
+  @page{size:letter landscape;margin:12mm}
+  body.pf{--bg:#fff;--panel:#fff;--panel2:#f3f4f6;--line:#d1d5db;--line2:#e5e7eb;--text:#111;--muted:#444;--faint:#666;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.pf main{max-width:none;padding:0}
+  body.pf>*:not(.apercu){display:none!important}
+  body.pf .apercu{position:static;display:block;background:#fff;backdrop-filter:none}
+  body.pf .ap-bar{display:none}
+  body.pf .ap-fond{padding:0;overflow:visible;display:block}
+  body.pf .ap-page{box-shadow:none;width:auto;min-height:0;padding:0;margin:0}
+  body.pf .f-tete{border-bottom-color:#111}
+  body.pf .duo b{font-size:30px}
+  body.pf table.dept{font-size:12px}body.pf table.dept td,body.pf table.dept th{padding:6px 8px}
+}
+.f-pied{margin-top:14px;font-size:10.5px;color:var(--faint)}
+.kbd{font-size:10.5px;opacity:.7;margin-left:4px;font-weight:500}
+.apercu{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;background:rgba(10,12,16,.72);backdrop-filter:blur(6px)}
+.apercu.on{display:flex}
+.ap-bar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+.ap-fond{flex:1;overflow:auto;padding:28px;display:flex;justify-content:center;align-items:flex-start}
+.ap-page{--bg:#fff;--panel:#fff;--panel2:#f3f4f6;--line:#d1d5db;--line2:#e5e7eb;--text:#111;--muted:#4b5563;--faint:#6b7280;color-scheme:light;
+  background:#fff;color:#111;width:11in;max-width:100%;min-height:8.5in;padding:.55in .6in;box-shadow:0 20px 60px rgba(0,0,0,.45);border-radius:4px}
+.ap-page .duo b{font-size:30px}
+.ap-page table.dept{font-size:12.5px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">CI</div>ctmCI</div>
+  <nav class="tabs" id="tabs"></nav>
+  <div class="sp"></div>
+  <div class="seg" id="sess" title="Session"></div>
+  <div class="seg" id="sauv"><button data-a="sauver" title="Enregistrer toutes tes données dans un fichier (Téléchargements)">⤓ Sauvegarder</button><button data-a="recup" title="Recharger un fichier de sauvegarde">⤒ Récupérer</button></div>
+  <input type="file" id="fichier" accept=".json,application/json" hidden>
+  <div class="seg" id="theme"></div>
+  <button class="dot" style="position:static;opacity:1;width:16px;height:16px;background:var(--accent)" data-a="pop" data-k="accent" title="Couleur principale"></button>
+</header>
+<main id="app"></main>
+<div class="scrim" id="scrim" data-a="close"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="pop" id="pop"></div>
+<div class="toast" id="toast"></div>
+<div class="apercu" id="apercu"></div>
+
+<script>
+// <calcul> ===== Calcul pur (sans écran) — Annexe I-1, FNEEQ 2023-2028 =====
+const CI = {
+  IND: 1.8, LABO: 2.0, HC: 1.2, PES1: 0.04, PES2: 0.07, PES_SEUIL: 415,
+  facteurAuto(n) { if (n <= 0) return 0; if (n <= 2) return 0.9; if (n === 3) return 1.1; return 1.75; },
+  calcule(lignes, o = {}) {
+    const r = { princH: 0, compH: 0, indivH: 0, laboH: 0, HP: 0, HC: 0, PES: 0, preps: [], groupes: [], inconnus: [], parEtudiant: 0, ciAutres: 0, autres: [] };
+    const vues = new Map();
+    for (const l of lignes) {
+      if (l.type === 'principal' || l.type === 'complementaire') {
+        const h = (Number(l.qte) || 0) * (Number(l.h) || 1);
+        r.indivH += h; if (l.type === 'principal') r.princH += h; else r.compH += h;
+      } else if (l.type === 'autre') { // coordination, PVRTT, libération… : CI fixe, sans heures
+        r.ciAutres += Number(l.ci) || 0; r.autres.push({ nom: l.nom, ci: Number(l.ci) || 0 });
+      } else if (l.type === 'labo') {
+        r.laboH += (Number(l.qte) || 0) * (Number(l.h) || 1);
+      } else if (l.type === 'collectif') {
+        const k = l.prep || l.id;
+        if (!vues.has(k)) { vues.set(k, Number(l.hp) || 0); r.preps.push({ k, hp: Number(l.hp) || 0, nom: l.nom }); }
+        for (const g of l.groupes || []) {
+          const h = Number(g.h) || 0; r.HC += h;
+          const inc = g.n === null || g.n === '' || g.n === undefined;
+          if (inc) { r.inconnus.push(l.nom); r.parEtudiant += h * CI.PES1; }
+          else r.PES += Number(g.n) * h;
+          r.groupes.push({ nom: l.nom, n: inc ? null : Number(g.n), h });
+        }
+      }
+    }
+    r.nPrep = vues.size;
+    r.HP = [...vues.values()].reduce((a, b) => a + b, 0);
+    r.Fauto = CI.facteurAuto(r.nPrep);
+    r.manuel = o.fMode === 'manuel' && o.fManuel !== '' && o.fManuel != null;
+    r.F = r.manuel ? Number(o.fManuel) : r.Fauto;
+    r.ciInd = CI.IND * r.indivH;
+    r.ciLabo = CI.LABO * r.laboH;
+    r.ciHP = r.F * r.HP;
+    r.ciHC = CI.HC * r.HC;
+    r.ciPES = r.PES <= CI.PES_SEUIL ? CI.PES1 * r.PES : CI.PES1 * CI.PES_SEUIL + CI.PES2 * (r.PES - CI.PES_SEUIL);
+    r.ci = rond(r.ciInd + r.ciLabo + r.ciHP + r.ciHC + r.ciPES + r.ciAutres);
+    r.heures = r.indivH + r.laboH + r.HC;
+    r.inconnus = [...new Set(r.inconnus)];
+    return r;
+  },
+  // Combien d'heures de complémentaire faut-il pour atteindre la cible ?
+  complementairesRequis(r, cible) {
+    const sans = r.ci - CI.IND * r.compH;
+    return Math.max(0, Math.ceil((cible - sans) / CI.IND - 1e-9));
+  },
+};
+function rond(x) { return Math.round(x * 100 + 1e-9) / 100; }
+// </calcul>
+
+// ===== Programme de musique (catalogue de tous les cours possibles) =====
+const C = (id, abbr, code, titre, type, x = {}) => ({ id, abbr, code, titre, type, statut: code ? 'officiel' : 'inconnu',
+  discipline: type === 'principal' || type === 'complementaire' ? '25' : '', h: 1, ...x });
+// Disciplines (numéro → nom officiel), d'après la liste d'ancienneté (codes 9XX) et l'Entente en musique (35).
+const DISC = { '05': 'Clarinette (classique)', '07': 'Contrebasse (classique)', '09': 'Flûte traversière (classique)', '10': 'Guitare (classique)',
+  '13': 'Percussion (classique)', '14': 'Piano (classique)', '16': 'Trompette (classique)', '19': 'Violon (classique)', '20': 'Violoncelle (classique)',
+  '21': 'Basse électrique (jazz pop)', '22': 'Batterie (jazz pop)', '23': 'Chant (jazz pop)', '24': 'Guitare électrique (jazz pop)', '25': 'Piano (jazz pop)',
+  '26': 'Saxophone (jazz pop)', '31': 'Trombone (jazz pop)', '32': 'Trompette (jazz pop) ?', '33': 'Théorie classique', '34': 'Théorie jazz-pop',
+  '35': 'Cours complémentaire', '36': 'Accordéon traditionnel', '37': 'Guitare traditionnelle', '38': 'Violon traditionnel', '40': 'Théorie traditionnelle' };
+const discNom = d => d ? `${d}${DISC[d] ? ' · ' + DISC[d] : ''}` : '';
+const PROGRAMME = () => [
+  C('1p2', '1P2', '551-1P2-JO', 'Instrument principal I', 'principal'),
+  C('2p2', '2P2', '551-2P2-JO', 'Instrument principal II', 'principal'),
+  C('3p2', '3P2', '551-3P2-JO', 'Instrument principal III', 'principal'),
+  C('4p2', '4P2', '551-P42-JO', 'Instrument principal IV', 'principal', { statut: 'observe', notes: '« 4P2 » dans l\'offre de la coordo ; 551-P42-JO sur les feuilles A26.' }),
+  C('p59', 'P59', '551-P59-JO', 'Instrument principal V', 'principal'),
+  C('p69', 'P69', '', 'Instrument principal VI', 'principal', { notes: 'Sigle complet à confirmer (« P69 » dans l\'offre de la coordo).' }),
+  C('1c1', '1C1', '551-1C1-JO', 'Instrument complémentaire I', 'complementaire'),
+  C('2c1', '2C1', '551-2C1-JO', 'Instrument complémentaire II', 'complementaire'),
+  C('3c1', '3C1', '551-3C1-JO', 'Instrument complémentaire III', 'complementaire'),
+  C('c41', 'C41', '551-C41-JO', 'Instrument complémentaire IV', 'complementaire', { notes: '551-C41-JO sur la feuille A26 officielle ; « 4C1 » dans l\'offre de la coordo.' }),
+  C('c51', 'C51', '551-C51-JO', 'Instrument complémentaire V', 'complementaire'),
+  C('c61', 'C61', '', 'Instrument complémentaire VI', 'complementaire', { notes: 'Sigle complet à confirmer (« C61 » dans l\'offre de la coordo).' }),
+  C('ensaj', 'ENS AJ', '551-ENS-AJ', 'Ensemble accompagnement jazz-pop', 'collectif', { hp: 1, hg: 1, prep: '551-ENS-AJ', discipline: '25' }),
+  C('3lp', '3LP', '551-3LP-JO', 'Théorie musicale III : jazz-pop', 'collectif', { usage: 'Théorie Jazz-Pop I', hp: 2, hg: 2, discipline: '34', notes: '« Langage JP I » sur les feuilles A26. Peut se prendre sans Techno VI (coordo, 29 oct. 2026 : temps plein année).' }),
+  C('tech6', 'Techno VI', '', 'Techno VI', 'collectif', { hp: 2, hg: 2, discipline: '34', notes: 'Peut se prendre sans 3LP (coordo, 29 oct. 2026 : temps plein année).' }),
+  C('combot', 'Combo tech.', '', 'Combo technique', 'collectif', { hp: 3, hg: 3, statut: 'estime' }),
+  C('combo2', 'Combo 2e', '551-ENS-CO', 'Combo 2e année', 'collectif', { hp: 2, hg: 2, statut: 'observe' }),
+  C('combo1', 'Combo 1re', '551-E13-CO', 'Combo 1re session', 'collectif', { hp: 1, hg: 1, discipline: '34', statut: 'officiel' }),
+  C('labo', 'Labo piano', '551-PIA-JP', 'Laboratoire de piano JP', 'labo', { statut: 'estime' }),
+  C('1f3', '1F3', '551-1F3-JO', 'Formation auditive I', 'collectif', { hp: 2, hg: 2, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('2f3', '2F3', '551-2F3-JO', 'Formation auditive II', 'collectif', { hp: 3, hg: 3, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('3f3', '3F3', '551-3F3-JO', 'Formation auditive III', 'collectif', { hp: 3, hg: 3, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('f43', 'F43', '551-F43-JO', 'Formation auditive IV', 'collectif', { hp: 3, hg: 3, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('f54', 'F54', '551-F54-JO', 'Formation auditive V', 'collectif', { hp: 3, hg: 3, discipline: '34', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('1l2', '1L2', '551-1L2-JO', 'Langage I (théorie musicale)', 'collectif', { hp: 2, hg: 2, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('2l2', '2L2', '551-2L2-JO', 'Langage II', 'collectif', { hp: 2, hg: 2, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('3lc', '3LC', '551-3LC-JO', 'Éléments des langages III', 'collectif', { hp: 2, hg: 2, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('l42', 'L42', '551-L42-JO', 'Éléments des langages IV', 'collectif', { hp: 2, hg: 2, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('j22', 'J22', '551-J22-JO', 'Langage JP II', 'collectif', { hp: 2, hg: 2, discipline: '34', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('j32', 'J32', '551-J32-JO', 'Langage JP III', 'collectif', { hp: 2, hg: 2, discipline: '34', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('1h3', '1H3', '551-1H3-JO', 'Histoire I', 'collectif', { hp: 3, hg: 3, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('3h3', '3H3', '551-3H3-JO', 'Histoire III', 'collectif', { hp: 3, hg: 3, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('1t1', '1T1', '551-1T1-JO', 'Techno I', 'collectif', { hp: 1, hg: 1, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('3t1', '3T1', '551-3T1-JO', 'Techno III', 'collectif', { hp: 1, hg: 1, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('t52', 'T52', '551-T52-JO', 'Techno V', 'collectif', { hp: 2, hg: 2, discipline: '34', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('sj1', 'SJ1', '551-SJ1-JO', 'Studio JP I', 'collectif', { hp: 3, hg: 3, discipline: '34', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('ej5', 'EJ5', '551-EJ5-JO', 'Combo 3e année', 'collectif', { hp: 3, hg: 3, discipline: '', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('ryt', 'RYT', '551-RYT-AT', 'Atelier jeux rythmiques', 'collectif', { hp: 1, hg: 1, discipline: '22', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('m002', '002', '551-002-JO', 'Appoint théorie', 'collectif', { hp: 1, hg: 1, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('m003', '003', '551-003-JO', 'Mise à niveau solfège', 'collectif', { hp: 2, hg: 2, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+  C('m004', '004', '551-004-JO', 'Mise à niveau', 'collectif', { hp: 3, hg: 3, discipline: '33', notes: 'Vu sur les feuilles A26 du département.' }),
+];
+// Une session = ce qui m'est offert + mes scénarios. Offre : { n } élèves (individuel) ou { gr, n } groupes et étudiants par groupe.
+// Départ vide : la session en cours et la suivante, sans offre (chacun entre la sienne, ou ⤒ Récupérer une sauvegarde)
+const SESSIONS = () => {
+  const d = new Date(), y = d.getFullYear(), m = d.getMonth() + 1;
+  const [act, proch] = m >= 6 ? [`Automne ${y}`, `Hiver ${y + 1}`] : [`Hiver ${y}`, `Automne ${y}`];
+  const vide = (id, nom, role) => ({ id, nom, role, annee: anneeDe(nom), verrou: false, voir: null, retenu: null, offre: {}, scenarios: [] });
+  return [vide('s1', act, 'actuelle'), vide('s2', proch, 'prochaine')];
+};
+const CLE = 'ctmci-v2';
+const DEFAUT = () => ({ v: 2, tab: 'cours', theme: 'dark', sombreParDefaut: true, maj3: true, maj4: true, accent: '#5b6cff', couleurs: {}, cible: 40, cours: PROGRAMME(), sessions: SESSIONS(), sess: 's2', a26v: 'sept', a26: { contrat: '1,0' } });
+// Année scolaire d'une session, d'après son nom (Automne 2026 → 2026-2027)
+const anneeDe = nom => { const m = /(automne|hiver|été)\s*(\d{4})/i.exec(nom || ''); if (!m) return ''; const y = +m[2]; return /automne/i.test(m[1]) ? `${y}-${y + 1}` : `${y - 1}-${y}`; };
+let S;
+const lireBrut = () => { try { if (window.ctmciApp) { const t = window.ctmciApp.lire(); if (t) return t; } } catch (e) {} try { return localStorage.getItem(CLE); } catch (e) { return null; } };
+try { const o = JSON.parse(lireBrut() || 'null'); S = o && o.v === 2 ? Object.assign(DEFAUT(), o) : DEFAUT(); } catch (e) { S = DEFAUT(); }
+S.sessions.forEach(x => { if (x.verrou === undefined) x.verrou = true; if (x.annee === undefined) x.annee = anneeDe(x.nom); });
+// Feuilles A26 du département (26 sept.) : cours du programme et sigles observés
+if (!S.maj4) {
+  const ref = PROGRAMME();
+  ref.forEach(c => { if (!S.cours.some(x => x.id === c.id)) S.cours.push(c); });
+  ['4p2', 'combo1', 'combo2'].forEach(id => { const a = S.cours.find(x => x.id === id), b = ref.find(x => x.id === id); if (a && b) Object.assign(a, { code: b.code, statut: b.statut, notes: b.notes || a.notes, discipline: b.discipline || a.discipline }); });
+  S.maj4 = true;
+}
+// 29 oct. 2026 : la coordo confirme que 3LP et Techno VI peuvent se prendre séparément
+if (!S.maj3) {
+  [['3lp', 'Peut se prendre sans Techno VI (coordo, 29 oct. 2026 : temps plein année).'], ['tech6', 'Peut se prendre sans 3LP (coordo, 29 oct. 2026 : temps plein année).']].forEach(([id, n]) => { const c = S.cours.find(x => x.id === id); if (c) { delete c.lien; c.notes = n; } });
+  const h = S.sessions.find(x => x.id === 'H27');
+  if (h && !h.scenarios.some(x => x.nom.startsWith('3LP seul'))) { const sc = { id: '3', nom: '3LP seul + compl.', sel: { '2p2': 2, '4p2': 1, p69: 1, ensaj: 2, '3lp': 1, '1c1': 1, '2c1': 6, '3c1': 2, c41: 3, c61: 2 }, fMode: 'auto', fManuel: '' }; sc.id = String(Math.max(0, ...h.scenarios.map(x => +x.id || 0)) + 1); h.scenarios.push(sc); }
+  S.maj3 = true;
+}
+if (!S.sombreParDefaut) { S.theme = 'dark'; S.sombreParDefaut = true; } // sombre par défaut (2026-10-29)
+let dernierEcrit = null;
+const save = () => {
+  const t = JSON.stringify(S); if (t === dernierEcrit) return; dernierEcrit = t;
+  try { localStorage.setItem(CLE, t); } catch (e) {}
+  try { if (window.ctmciApp) window.ctmciApp.ecrire(t); } catch (e) {}
+};
+
+// ===== Outils =====
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const f2 = x => Number(x).toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fn = x => Number(x).toLocaleString('fr-CA', { maximumFractionDigits: 2 });
+const STAT = { officiel: 'Confirmé', observe: 'Observé', estime: 'Estimé', inconnu: 'À confirmer' };
+const CAT = { principal: ['Instrument principal', 'var(--c-princ)'], complementaire: ['Instrument complémentaire', 'var(--c-comp)'], collectif: ['Cours de groupe', 'var(--c-grp)'], labo: ['Laboratoire', 'var(--c-labo)'] };
+const TYPES = Object.fromEntries(Object.entries(CAT).map(([k, v]) => [k, v[0]]));
+const ORDRE = Object.keys(CAT);
+const badge = s => `<span class="chip b-${s}">${STAT[s] || s}</span>`;
+const cours = id => S.cours.find(c => c.id === id);
+const dot = k => `<button class="dot" data-a="pop" data-k="${k}" title="Couleur de la bordure"></button>`;
+const cc = k => S.couleurs[k] ? `style="--cc:${S.couleurs[k]}"` : '';
+const PALETTE = ['#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9',
+  '#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#78716c','#64748b','#111827',
+  '#fca5a5','#fdba74','#fde047','#bef264','#86efac','#5eead4','#7dd3fc','#a5b4fc','#d8b4fe','#f9a8d4'];
+
+// ===== Session, offre, scénarios =====
+const ses = () => S.sessions.find(s => s.id === S.sess) || S.sessions[0];
+const scs = () => ses().scenarios;
+const scActif = () => scs().find(s => s.id === ses().voir) || scs()[0];
+const scRetenu = () => scs().find(s => s.id === ses().retenu) || null;
+const scById = id => scs().find(s => s.id === id);
+const noSc = sc => scs().indexOf(sc) + 1;
+const off = id => ses().offre[id];
+const offerts = () => S.cours.filter(c => off(c.id));
+const maxDe = c => { const o = off(c.id); return !o ? 0 : c.type === 'collectif' ? (o.gr || 0) : (o.n || 0); };
+const unite = c => c.type === 'collectif' ? 'groupe' : c.type === 'labo' ? 'heure' : 'élève';
+const pl = (n, mot) => `${fn(n)} ${mot}${n > 1 ? 's' : ''}`;
+const pris = (sc, c) => { const v = sc && sc.sel[c.id]; if (!v || !off(c.id)) return 0; return Math.min(v === true ? maxDe(c) : Number(v) || 0, maxDe(c)); };
+const reste = (sc, c) => maxDe(c) - pris(sc, c);
+const groupesDe = (c, k) => Array.from({ length: k }, () => ({ n: off(c.id).n ?? null, h: c.hg || 1 }));
+function lignesDe(sc) {
+  const out = [];
+  for (const c of S.cours) {
+    const q = pris(sc, c); if (!q) continue;
+    if (c.type === 'collectif') out.push({ type: 'collectif', id: c.id, nom: c.abbr, prep: c.prep || c.code || c.id, hp: c.hp, groupes: groupesDe(c, q) });
+    else out.push({ type: c.type, qte: q, h: c.h || 1, nom: c.abbr });
+  }
+  for (const a of sc.autres || []) out.push({ type: 'autre', nom: (a.lib || 'Autre') + (a.unite === 'pct' && a.pct ? ` (${fn(a.pct)} %)` : ''), ci: ciAut(a) });
+  return out;
+}
+const garde = () => ses().garde ?? 100;            // % de tâche gardé ici (scission)
+// ----- Tâche annuelle : 80 CI = 100 % sur l'année (automne + hiver) -----
+function calcSes(x, sc) { const k = S.sess; S.sess = x.id; try { return calc(sc); } finally { S.sess = k; } }
+// Les autres sessions de la même année : CI de leur choix (« Mon choix »), ou rien si pas encore choisi
+function autresAnnee() {
+  const a = ses().annee; if (!a) return [];
+  return S.sessions.filter(x => x !== ses() && x.annee === a).map(x => { const sc = x.scenarios.find(s => s.id === x.retenu); return { nom: x.nom, ci: sc ? calcSes(x, sc).ci : null }; });
+}
+const modeAnnee = () => S.cibleMode !== 'session' && autresAnnee().some(x => x.ci != null);
+// CI visée dans cette session : l'année (80 − les autres sessions) ou la session seule (40), × % gardé
+function cibleS() {
+  const base = S.cible * garde() / 100;
+  if (!modeAnnee()) return base;
+  const deja = autresAnnee().reduce((a, x) => a + (x.ci ?? 0), 0);
+  return Math.max(0, rond(2 * base - deja));
+}
+const ciAnnee = r => rond(r.ci + autresAnnee().reduce((a, x) => a + (x.ci ?? 0), 0));
+const calc = sc => CI.calcule(sc ? lignesDe(sc) : [], sc || {});
+// Ajouter / retirer dans une sélection (les cours liés suivent)
+function plus1(sel, k) {
+  const c = cours(k), sc = { sel };
+  if (reste(sc, c) <= 0) return false;
+  sel[k] = pris(sc, c) + 1;
+  const l = c.lien && cours(c.lien);
+  if (l && off(l.id) && !pris(sc, l)) sel[l.id] = 1;
+  return true;
+}
+function moins1(sel, k, tout) {
+  const c = cours(k), q = tout ? 0 : Math.max(0, pris({ sel }, c) - 1);
+  sel[k] = q;
+  if (!q && c.lien) sel[c.lien] = 0;
+}
+// Ce que rapporte un cours de plus (y compris l'effet sur le facteur HP)
+function effet(sc, k) {
+  const av = calc(sc), t = JSON.parse(JSON.stringify(sc));
+  if (!plus1(t.sel, k)) return null;
+  const ap = calc(t);
+  return { d: rond(ap.ci - av.ci), fx: rond((ap.F - av.F) * av.HP), Fav: av.F, Fap: ap.F, inc: ap.inconnus.length > av.inconnus.length };
+}
+// CI de chaque cours d'un scénario (même F pour tous les cours de groupe)
+function ciParCours(sc) {
+  const r = calc(sc), out = {}, vues = new Set();
+  for (const c of S.cours) {
+    const q = pris(sc, c); if (!q) continue;
+    if (c.type === 'collectif') {
+      const k = c.prep || c.code || c.id, hp = vues.has(k) ? 0 : (Number(c.hp) || 0); vues.add(k);
+      const g = groupesDe(c, q), hc = g.reduce((x, y) => x + y.h, 0), inc = g.some(y => y.n == null);
+      const pes = g.reduce((x, y) => x + (y.n == null ? 0 : y.n * y.h), 0);
+      out[c.id] = { h: hc, ci: rond(r.F * hp + CI.HC * hc + CI.PES1 * pes), inc };
+    } else { const h = q * (c.h || 1); out[c.id] = { h, ci: rond(h * (c.type === 'labo' ? CI.LABO : CI.IND)) }; }
+  }
+  return out;
+}
+const prochainId = () => String(Math.max(0, ...scs().map(s => +s.id || 0)) + 1);
+function nouveauScenario(nom, sel) {
+  const id = prochainId(); scs().push({ id, nom, sel, fMode: 'auto', fManuel: '' }); ses().voir = id; S.comp = false; S.tab = 'sc';
+  render(); const i = $('.ttl-in'); if (i) { i.focus(); i.select(); }
+}
+const selFermes = () => Object.fromEntries(offerts().filter(c => off(c.id).ferme).map(c => [c.id, maxDe(c)]));
+
+// ===== Affichage =====
+// ===== Annuler ⌘Z / Rétablir ⇧⌘Z (données seulement, pas l'onglet ou l'affichage) =====
+const VUE = ['cibleMode', 'vueBlocs', 'progReplie', 'tab', 'comp', 'calcOuvert', 'cherche', 'autres', 'ajusterF', 'a26v', 'sess'];
+const photo = () => JSON.stringify(S, (k, v) => VUE.includes(k) ? undefined : v);
+let hist = [], futur = [], actuel = null;
+function noter() { const p = photo(); if (actuel !== null && p !== actuel) { hist.push(actuel); if (hist.length > 200) hist.shift(); futur = []; } actuel = p; }
+function remettre(p) { const vue = Object.fromEntries(VUE.map(k => [k, S[k]])); S = Object.assign(JSON.parse(p), vue); actuel = p; fermer(); render(); }
+function annuler() { if (!hist.length) return toast('Rien à annuler'); futur.push(actuel); remettre(hist.pop()); toast('Annulé'); }
+function refaire() { if (!futur.length) return toast('Rien à rétablir'); hist.push(actuel); remettre(futur.pop()); toast('Rétabli'); }
+let toastT;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2200); }
+// − n sur max + : le + disparaît quand c'est plein ; rien du tout s'il n'y a qu'un seul élève/groupe offert
+function compteur(c, q, sid = '') {
+  const n = maxDe(c), s = sid ? ` data-s="${sid}"` : '';
+  if (n <= 1) return '<span class="step vide"></span>';
+  return `<div class="step"><button data-a="moins"${s} data-k="${c.id}" title="Un de moins">−</button><span>${q}<em> sur ${n}</em></span>${q < n ? `<button data-a="plus"${s} data-k="${c.id}" title="Un de plus">+</button>` : '<i class="plein" title="Tout est pris">✓</i>'}</div>`;
+}
+let dernier = null; // dernier cours ajouté (petite animation)
+function render() {
+  document.documentElement.style.setProperty('--accent', S.accent);
+  if (S.theme === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = S.theme;
+  $('#tabs').innerHTML = [['cours', '1 · Cours'], ['sc', '2 · Scénarios'], ['a26', '3 · Feuilles officielles']]
+    .map(([k, t]) => `<button class="${S.tab === k ? 'on' : ''}" data-a="tab" data-k="${k}">${t}</button>`).join('');
+  $('#sess').innerHTML = `<button class="on sessb" data-a="sessmenu" title="Changer de session ou en créer une"><span>${esc(ses().nom)}${ses().role ? `<small>${ses().role}</small>` : ''}</span><i>▾</i></button>`;
+  $('#theme').innerHTML = [['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre']]
+    .map(([k, t]) => `<button class="${S.theme === k ? 'on' : ''}" data-a="theme" data-k="${k}">${t}</button>`).join('');
+  const y = scrollY, garde = {};
+  document.querySelectorAll('[data-keep]').forEach(e => garde[e.dataset.keep] = e.scrollTop);
+  $('#app').innerHTML = { sc: vueScenarios, cours: vueCours, a26: vueFeuilles }[S.tab]();
+  scrollTo(0, y);
+  document.querySelectorAll('[data-keep]').forEach(e => { if (garde[e.dataset.keep]) e.scrollTop = garde[e.dataset.keep]; });
+  noter();
+  save();
+}
+
+// ----- Onglet Scénarios -----
+function vueScenarios() {
+  if (!offerts().length) return `<section class="card vide-z" style="height:auto;padding:48px;text-align:center">
+    <h2>Aucun cours offert pour ${esc(ses().nom)}</h2><div class="sub" style="margin:6px 0 14px">Commence par indiquer ce qu'on t'offre, dans l'onglet Cours.</div>
+    <button class="btn pri" data-a="tab" data-k="cours">Aller à Cours →</button></section>`;
+  if (!scs().length) nouveauScenarioSilencieux();
+  const sc = scActif(), comp = S.comp && scs().length > 1;
+  const onglets = `<div class="sctabs">
+    ${scs().map(s => { const r = calc(s); return `<button class="sct ${!comp && s.id === sc.id ? 'on' : ''}" ${cc('sc-' + s.id)} data-a="voir" data-k="${s.id}" title="Double-clic : renommer">
+      <span class="no">${noSc(s)}</span><span class="nm">${esc(s.nom)}</span><span class="ci">${r.inconnus.length ? '≥ ' : ''}${fn(Math.round(r.ci / S.cible * 100))} %</span>${ses().retenu === s.id ? '<span class="choix">✓ Mon choix</span>' : ''}</button>`; }).join('')}
+    <button class="sct add" data-a="newmenu" title="Nouveau scénario">+</button>
+    <div class="sp"></div>
+    ${scs().length > 1 ? `<button class="pill ${comp ? 'on' : ''}" data-a="comp">⇆ Comparer</button>` : ''}
+  </div>`;
+  const pied = `<p class="sub" style="text-align:center;margin-top:20px">Simulation pour comprendre — ce n'est pas une CI officielle. Formule simplifiée de l'annexe I-1 (sans N1–N6, NES, CO).</p>`;
+  if (comp) return onglets + vueComparer() + pied;
+  return onglets + constructeur(sc) + `
+    <section class="card" ${cc('etapes')} style="margin-top:18px">${dot('etapes')}
+      <button class="dep" data-a="calc"><span>${S.calcOuvert ? '▾' : '▸'}</span><h2>Voir le calcul, étape par étape</h2><span class="sub">scénario ${noSc(sc)}</span></button>
+      ${S.calcOuvert ? etapes(calc(sc), sc) : ''}
+    </section>` + pied;
+}
+function nouveauScenarioSilencieux() { scs().push({ id: '1', nom: 'Scénario 1', sel: selFermes(), fMode: 'auto', fManuel: '' }); ses().voir = '1'; }
+
+function jauge(r) {
+  const cible = cibleS(), pct = r.ci / S.cible * 100, ecart = r.ci - cible, g = garde();
+  const parts = partsDe(r);
+  const max = Math.max(S.cible * 1.25, r.ci * 1.05), w = x => (x / max * 100).toFixed(2) + '%';
+  return `<div class="hero-in">
+      ${duo(r)}
+      <div style="flex:1;min-width:220px">
+        <div class="hbar">${parts.map(([t, x]) => `<i class="seg" style="width:${w(x)};background:${catCol(t)}" title="${catNom(t)} : ${f2(x)} CI"></i>`).join('')}<i class="seg ghost" id="ghost"></i>
+          ${Math.abs(cible - S.cible) > 0.005 ? `<span class="mark faint" style="left:${w(S.cible)}"><em>100 %</em></span>` : ''}<span class="mark" style="left:${w(cible)}"><em>${Math.abs(cible - S.cible) > 0.005 ? `visé ${fn(Math.round(cible / S.cible * 100))} %` : '100 %'}</em></span></div>
+        <div class="legend">${parts.map(([t, x]) => `<span><i style="background:${catCol(t)}"></i>${catNom(t)} <b class="num">${f2(x)}</b></span>`).join('')}</div>
+      </div>
+      <div class="hstats"><div><small>CI</small><b class="num">${r.inconnus.length ? '≥ ' : ''}${f2(r.ci)}</b></div>${modeAnnee() ? `<div><small>Année</small><b class="num">${r.inconnus.length ? '≥ ' : ''}${fn(Math.round(ciAnnee(r) / (2 * S.cible) * 100))} %</b></div>` : ''}<div><small>Écart à ${fn(cible)}</small><b class="num" style="color:${ecart >= 0 ? 'var(--ok)' : 'var(--bad)'}">${ecart >= 0 ? '+' : ''}${f2(ecart)}</b></div></div>
+    </div>`;
+}
+
+// ===== Vue « Blocs d'heures » : une heure (ou un groupe) = un bloc =====
+const basculeVue = () => `<div class="seg vseg"><button class="${S.vueBlocs ? '' : 'on'}" data-a="vblocs" data-k="0">☰ Liste</button><button class="${S.vueBlocs ? 'on' : ''}" data-a="vblocs" data-k="1">▦ Blocs d'heures</button></div>`;
+function blocs(sc) {
+  const pc = ciParCours(sc), r = calc(sc), out = [], parCat = {};
+  for (const t of ORDRE) for (const c of S.cours.filter(x => x.type === t && pris(sc, x))) {
+    const q = pris(sc, c), coll = t === 'collectif', h = coll ? (c.hg || 1) : (c.h || 1), ciU = pc[c.id].ci / q, n = off(c.id).n;
+    parCat[t] = (parCat[t] || 0) + q * h;
+    for (let i = 0; i < q; i++) out.push(`<div class="blk ${dernier === c.id && i === q - 1 ? 'neu' : ''}" style="--cat:${CAT[t][1]};--h:${h}" title="${esc(c.abbr)} · ${coll ? `groupe ${i + 1}` : `${unite(c)} ${i + 1}`} · ${fn(h)} h · ${f2(ciU)} CI">
+      <b>${esc(c.abbr)}</b><small>${coll ? `gr. ${i + 1} · ${fn(h)} h${n != null ? ` · ${n} ét.` : ''}` : `${fn(h)} h`}</small><em>${pc[c.id].inc ? '≥ ' : ''}${f2(ciU)}</em></div>`);
+  }
+  return `<div class="blk-l"><b>${fn(r.heures)} h par semaine</b>${ORDRE.filter(t => parCat[t]).map(t => `<span><i style="background:${CAT[t][1]}"></i>${CAT[t][0]} ${fn(parCat[t])} h</span>`).join('')}</div>
+    <div class="blocs">${out.join('')}</div>
+    <div class="sub" style="margin-top:8px">Chaque bloc = 1 élève ou 1 groupe. Plus large = plus d'heures. Le chiffre = CI rapportée.</div>`;
+}
+
+// ===== Lignes de cours : les mêmes dans Scénarios et dans Cours =====
+const PRIO = ' <span class="chip" title="Ta priorité : gardée dans tes scénarios de base (ton choix, pas une règle du cégep)">priorité</span>';
+const pipsDe = (c, n) => `<div class="pips">${Array.from({ length: maxDe(c) }, (_, i) => `<i class="${i < n ? 'x' : ''}"></i>`).join('')}</div>`;
+// Un cours offert : ce qui reste, et un bouton pour l'ajouter au scénario sc
+function ligneDispo(c, sc, src, action, label) {
+  const o = off(c.id), coll = c.type === 'collectif', n = maxDe(c), pr = pris(sc, c), libres = n - pr;
+  const e = libres && sc ? effet(sc, c.id) : null;
+  const quoi = coll ? `${pl(n, 'groupe')} de ${fn(c.hg || 1)} h · ${o.n ?? '?'} étud./gr.` : `${pl(n, unite(c))} offert${n > 1 ? 's' : ''}`;
+  return `<div class="brow ${libres ? '' : 'fini'}" style="--cat:${CAT[c.type][1]}" ${libres ? `draggable="true" data-drag="${src}:${c.id}"` : ''}>
+    <div class="nm"><b>${esc(c.abbr)}</b>${o.ferme ? PRIO : ''}<small>${esc(c.usage || c.titre)} · ${quoi}</small>
+      <div class="dispo">${pipsDe(c, pr)}<span>${libres ? `${pl(libres, 'libre')}${pr ? ` · ${pr} pris` : ''}` : 'tout pris'}</span></div></div>
+    ${libres ? `<button class="addb" data-a="${action}" data-k="${c.id}"><span>${label}</span>${e ? `<small>${e.inc ? '≥ ' : ''}+${f2(e.d)} CI</small>` : ''}</button>` : '<span class="okc">✓</span>'}
+  </div>${e && e.fx ? `<div class="fx">↳ dont ${e.fx > 0 ? '+' : ''}${f2(e.fx)} : le facteur HP passe de ${fn(e.Fav)} à ${fn(e.Fap)} pour tous tes cours de groupe</div>` : ''}`;
+}
+// Un cours pris dans le scénario sc
+function lignePrise(c, sc, pc, src) {
+  const o = off(c.id), q = pris(sc, c), v = pc[c.id], coll = c.type === 'collectif';
+  return `<div class="brow ${dernier === c.id ? 'neu' : ''}" style="--cat:${CAT[c.type][1]}" draggable="true" data-drag="${src}:${c.id}">
+    <div class="nm"><b>${esc(c.abbr)}</b>${o.ferme ? PRIO : ''}<small>${esc(c.usage || c.titre)} · ${coll ? `${pl(q, 'groupe')} × ${fn(c.hg || 1)} h` : pl(q * (c.h || 1), 'heure')}</small>
+      ${coll ? `<label class="eff ligne"><input class="inp sm" placeholder="?" value="${o.n ?? ''}" data-ch="oeff" data-k="${c.id}"> étudiants par groupe</label>` : ''}</div>
+    ${compteur(c, q, sc.id)}
+    <span class="v num">${v.inc ? '≥ ' : ''}${f2(v.ci)}</span>
+    <button class="x" data-a="retire" data-s="${sc.id}" data-k="${c.id}" title="Retirer">×</button></div>`;
+}
+
+function constructeur(sc) {
+  const r = calc(sc), cible = cibleS(), ecart = r.ci - cible;
+  const offreC = offerts().filter(c => c.type === 'complementaire').reduce((a, c) => a + maxDe(c), 0);
+  const req = CI.complementairesRequis(r, cible);
+  const avert = [];
+  if (r.inconnus.length) avert.push(`<div class="note warn">◔ <div>Nombre d'étudiants inconnu : <b>${r.inconnus.join(', ')}</b>. Le % est un <b>minimum</b>. Tape le nombre dans la tuile pour voir.</div></div>`);
+  if (r.manuel && Math.abs(r.F - r.Fauto) > 1e-9) avert.push(`<div class="note warn">⚑ <div>Facteur HP ajusté à la main : <b>${fn(r.F)}</b> au lieu de ${fn(r.Fauto)}.</div></div>`);
+  if (ecart < 0) avert.push(req > offreC
+    ? `<div class="note bad">✕ <div>Même avec tous les complémentaires offerts, il manquerait ${pl(req - offreC, 'heure')} pour atteindre la cible.</div></div>`
+    : `<div class="note">→ <div>Il te manque <b>${f2(-ecart)} CI</b> : environ <b>${pl(Math.max(0, req - r.compH), 'complémentaire')}</b> de plus.</div></div>`);
+  const gauche = ORDRE.map(t => { const l = offerts().filter(c => c.type === t); return l.length ? `<h3>${CAT[t][0]}</h3>${l.map(c => ligneDispo(c, sc, 'off', 'ajoute', '+ Ajouter')).join('')}` : ''; }).join('');
+  const pc = ciParCours(sc), dans = S.cours.filter(c => pris(sc, c));
+  const sect = t => {
+    const l = dans.filter(c => c.type === t); if (!l.length) return '';
+    const tot = l.reduce((a, c) => a + pc[c.id].ci, 0);
+    return `<h3 style="display:flex"><span style="flex:1">${CAT[t][0]}</span><span class="num">${f2(tot)} CI</span></h3>${l.map(c => lignePrise(c, sc, pc, 'tache')).join('')}`
+      + (t === 'collectif' ? `<div class="fline"><span>Facteur HP <b>${fn(r.F)}</b> · calculé tout seul : ${pl(r.nPrep, 'cours de groupe différent')}${r.nPrep > 1 ? '' : ''}</span>
+        ${sc.fMode === 'manuel' || S.ajusterF ? `<select class="inp" style="width:auto" data-ch="fmode" data-s="${sc.id}"><option value="auto" ${sc.fMode !== 'manuel' ? 'selected' : ''}>Auto</option><option value="manuel" ${sc.fMode === 'manuel' ? 'selected' : ''}>Manuel</option></select>
+        ${sc.fMode === 'manuel' ? `<input class="inp sm" value="${esc(sc.fManuel)}" placeholder="0,9" data-ch="fman" data-s="${sc.id}">` : ''}` : '<button class="lnk" data-a="ajusterF">ajuster</button>'}</div>` : '');
+  };
+  return `<section class="card hero" ${cc('sc-' + sc.id)}>${dot('sc-' + sc.id)}
+    <div style="display:flex;gap:10px;align-items:center;padding-right:18px"><span class="chip" style="font-weight:700">Scénario ${noSc(sc)}</span><input class="ttl-in" value="${esc(sc.nom)}" data-ch="scnom" data-s="${sc.id}" placeholder="Nom du scénario" title="Clique pour renommer">
+      <div class="hacts">${ses().retenu === sc.id ? `<button class="choix gros" data-a="retenir" data-s="${sc.id}" title="Cliquer pour annuler ce choix">✓ Mon choix</button>` : `<button class="hb" data-a="retenir" data-s="${sc.id}">Choisir ce scénario</button>`}
+        <button class="hb" data-a="dup" data-s="${sc.id}">⧉ Dupliquer</button>${scs().length > 1 ? `<button class="hb del" data-a="del" data-s="${sc.id}">Supprimer</button>` : ''}</div></div>
+    <div class="garde">${autresAnnee().length ? `<div class="seg vseg" style="margin:0" title="Le temps plein se calcule sur l'année : 80 CI pour automne + hiver"><button class="${S.cibleMode !== 'session' ? 'on' : ''}" data-a="cmode" data-k="annee">Viser l'année</button><button class="${S.cibleMode === 'session' ? 'on' : ''}" data-a="cmode" data-k="session">Viser la session</button></div>` : ''}
+      <label title="Si tu fais scinder ta tâche (autre cégep) : le % que tu gardes ici">Tâche gardée ici <input class="inp sm" value="${fn(garde())}" data-ch="garde"> %</label>
+      <span class="sub">${modeAnnee() ? `Année ${esc(ses().annee)} : ${autresAnnee().map(x => `${esc(x.nom)} ${x.ci == null ? '(pas encore choisie)' : f2(x.ci)}`).join(' + ')} → il te faut <b>${f2(cibleS())} CI</b> cette session pour ${fn(garde())} % sur l'année` : garde() < 100 ? `soit ${f2(cibleS())} CI · le reste (${f2(S.cible - cibleS())} CI) irait à quelqu'un d'autre` : `cible : ${f2(cibleS())} CI cette session`}</span></div>
+    ${jauge(r)}
+    ${avert.join('')}
+  </section>
+  <div class="builder">
+    <section class="card zone-offre" ${cc('offre')} data-zone="offsc" data-keep="offsc">${dot('offre')}
+      <h2>➕ Ajouter des cours</h2><div class="sub">Ce qu'on t'offre en ${esc(ses().nom)}. Clique « + Ajouter » ou glisse la carte à droite.</div>
+      ${gauche}
+      <button class="lnk" data-a="tab" data-k="cours" style="margin-top:12px">Modifier ce qui m'est offert →</button>
+    </section>
+    <section class="card zone-tache" ${cc('tache')} data-zone="tache">${dot('tache')}
+      <h2>Dans ce scénario</h2><div class="sub">− / + pour le nombre d'élèves ou de groupes · × pour retirer (ou glisse la tuile à gauche).</div>
+      ${dans.length ? basculeVue() + (S.vueBlocs ? blocs(sc) : ORDRE.map(sect).join('')) : '<div class="vide-z">Ce scénario est vide.<br>Ajoute des cours à partir de la colonne de gauche.</div>'}
+      ${sectionAutres(sc)}
+    </section>
+  </div>`;
+}
+
+const AUT_COL = '#a78bfa';
+const partsDe = r => [['principal', CI.IND * r.princH], ['complementaire', CI.IND * r.compH], ['collectif', r.ciHP + r.ciHC + r.ciPES], ['labo', r.ciLabo], ['autre', r.ciAutres]].filter(p => p[1] > 0);
+const catCol = t => t === 'autre' ? AUT_COL : CAT[t][1];
+const catNom = t => t === 'autre' ? 'Autres éléments' : CAT[t][0];
+// Autres éléments de tâche (CI fixe, sans heures)
+const SUGG_AUT = ['Libération', 'PVRTT', 'Coordination départementale', 'Coordination de programme', 'Reclassement combo'];
+// Valeur en CI d'un élément : saisi en CI, ou en % de tâche (1 % = 0,4 CI pour une session de 40)
+const ciAut = a => a.unite === 'pct' ? rond((Number(a.pct) || 0) * S.cible / 100) : (Number(a.ci) || 0);
+function sectionAutres(sc) {
+  const l = sc.autres || [], tot = l.reduce((a, x) => a + ciAut(x), 0);
+  const libPct = l.filter(x => x.unite === 'pct').reduce((a, x) => a + (Number(x.pct) || 0), 0);
+  return `<h3 style="display:flex"><span style="flex:1">Autres éléments · coordination, libération, PVRTT…</span>${l.length ? `<span class="num">${f2(tot)} CI</span>` : ''}</h3>
+    ${l.map((a, i) => { const pct = a.unite === 'pct', v = pct ? a.pct : a.ci;
+      return `<div class="brow aut" style="--cat:${AUT_COL}">
+      <input class="inp" list="aut-l" value="${esc(a.lib)}" placeholder="Ex. Libération" data-ch="autlib" data-s="${sc.id}" data-i="${i}">
+      <input class="inp sm" value="${v === '' || v == null ? '' : fn(v)}" placeholder="0" data-ch="autval" data-s="${sc.id}" data-i="${i}">
+      <div class="seg vseg" style="margin:0"><button class="${pct ? '' : 'on'}" data-a="autu" data-s="${sc.id}" data-i="${i}" data-k="ci">CI</button><button class="${pct ? 'on' : ''}" data-a="autu" data-s="${sc.id}" data-i="${i}" data-k="pct">%</button></div>
+      <span class="conv">${pct ? `= ${f2(ciAut(a))} CI` : `= ${fn(Math.round(ciAut(a) / S.cible * 1000) / 10)} %`}</span>
+      <button class="x" data-a="autdel" data-s="${sc.id}" data-i="${i}" title="Retirer">×</button></div>`; }).join('')}
+    <datalist id="aut-l">${SUGG_AUT.map(x => `<option value="${x}">`).join('')}</datalist>
+    <div class="autadd"><button class="tagb" data-a="autadd" data-s="${sc.id}" data-k="Libération" data-u="pct">+ Libération (%)</button><button class="tagb" data-a="autadd" data-s="${sc.id}" data-k="PVRTT" data-u="pct">+ PVRTT (%)</button><button class="tagb" data-a="autadd" data-s="${sc.id}" data-k="Coordination départementale" data-u="ci">+ Coordination (CI)</button><button class="tagb" data-a="autadd" data-s="${sc.id}" data-k="" data-u="ci">+ Autre</button></div>
+    ${libPct > 60 ? `<div class="note warn">⚑ <div>Libérations : <b>${fn(libPct)} %</b> de tâche. Le maximum est <b>60 %</b> sur l'année (charge d'au moins 0,4 ETC, convention art. 5-14.01) ; pour une seule session, la charge est d'au plus 80 %.</div></div>` : ''}
+    <div class="hint">S'ajoute à ta tâche sans heures devant étudiants. En % : 20 % = 8 CI (sur une session de 40 CI).</div>`;
+}
+
+// Le % de tâche et les heures par semaine, côte à côte, même grosseur
+function duo(r, cls = '') {
+  const inc = r.inconnus.length ? '≥' : '';
+  return `<div class="duo ${cls}"><div><b class="num">${inc}${fn(Math.round(r.ci / S.cible * 100))}</b><span>%</span><small>de tâche</small></div>
+    <div><b class="num">${fn(r.heures)}</b><span>h</span><small>par semaine</small></div></div>`;
+}
+function barre(r, max) {
+  const parts = partsDe(r);
+  const w = x => (x / max * 100).toFixed(2) + '%';
+  return `<div class="hbar sm">${parts.map(([t, x]) => `<i class="seg" style="width:${w(x)};background:${catCol(t)}"></i>`).join('')}<span class="mark" style="left:${w(cibleS())}"></span></div>`;
+}
+function vueComparer() {
+  const L = scs().map(sc => ({ sc, r: calc(sc), pc: ciParCours(sc) }));
+  const cible = cibleS(), g = garde(), max = Math.max(cible * 1.2, ...L.map(x => x.r.ci * 1.05));
+  const pct = x => `${x.r.inconnus.length ? '≥ ' : ''}${fn(Math.round(x.r.ci / S.cible * 100))} %`;
+  const parH = x => x.r.heures ? x.r.ci / x.r.heures : 0;
+  const nomx = x => `<b>${noSc(x.sc)} · ${esc(x.sc.nom)}</b>`;
+  const atteint = L.filter(x => x.r.ci >= cible - 1e-9);
+  const proche = L.reduce((a, b) => b.r.ci > a.r.ci ? b : a);
+  const moinsH = atteint.length ? atteint.reduce((a, b) => b.r.heures < a.r.heures ? b : a) : null;
+  const rendement = L.reduce((a, b) => parH(b) > parH(a) ? b : a);
+  const inc = [...new Set(L.flatMap(x => x.r.inconnus))];
+  const bref = [
+    atteint.length ? `✓ ${atteint.length > 1 ? 'Atteignent' : 'Atteint'} la cible (${f2(cible)} CI${modeAnnee() ? ', année' : ''}) : ${atteint.map(nomx).join(', ')}` : `✕ Aucun scénario n'atteint la cible (${f2(cible)} CI). Le plus proche : ${nomx(proche)} (${pct(proche)}).`,
+    moinsH && atteint.length > 1 ? `⏱ Le moins d'heures pour y arriver : ${nomx(moinsH)} — ${fn(moinsH.r.heures)} h par semaine.` : '',
+    `↗ Chaque heure rapporte le plus dans ${nomx(rendement)} : ${f2(parH(rendement))} CI par heure.`,
+    inc.length ? `◔ Les « ≥ » vont monter selon le nombre d'étudiants en ${inc.join(', ')}.` : '',
+  ].filter(Boolean);
+  const cartes = L.map(x => { const ret = ses().retenu === x.sc.id, ec = x.r.ci - cible;
+    return `<div class="ccard ${ret ? 'ret' : ''}" ${cc('sc-' + x.sc.id)}>
+      <div class="ch"><span class="no">${noSc(x.sc)}</span><b>${esc(x.sc.nom)}</b></div>
+      ${duo(x.r, 'sm')}
+      ${barre(x.r, max)}
+      <div class="cl">${x.r.inconnus.length ? '≥ ' : ''}${f2(x.r.ci)} CI · ${f2(parH(x))} CI par heure</div>
+      <div class="cl" style="color:${ec >= 0 ? 'var(--ok)' : 'var(--bad)'}">${ec >= 0 ? `✓ cible atteinte (+${f2(ec)})` : `il manque ${f2(-ec)} CI`}</div>
+      <div class="cb">${ret ? `<button class="choix gros" data-a="retenir" data-s="${x.sc.id}">✓ Mon choix</button>` : `<button class="hb" data-a="retenir" data-s="${x.sc.id}">Choisir celui-ci</button>`}<button class="lnk" data-a="voir" data-k="${x.sc.id}">Ouvrir →</button></div>
+    </div>`; }).join('');
+  const utilises = S.cours.filter(c => L.some(x => x.pc[c.id]));
+  let lignes = '';
+  for (const t of ORDRE) {
+    const cs = utilises.filter(c => c.type === t); if (!cs.length) continue;
+    lignes += `<tr class="sec"><td colspan="${L.length + 1}">${CAT[t][0]}</td></tr>`;
+    lignes += cs.map(c => { const vals = L.map(x => x.pc[c.id] ? x.pc[c.id].h + ':' + x.pc[c.id].ci : '-'), diff = new Set(vals).size > 1;
+      return `<tr class="${diff ? 'diff' : 'same'}"><td><b>${esc(c.abbr)}</b> <span class="sub">${esc(c.usage || c.titre)}</span></td>${L.map(x => { const v = x.pc[c.id]; return `<td class="r">${v ? `${fn(v.h)} h · <b>${v.inc ? '≥ ' : ''}${f2(v.ci)}</b>` : '<span class="sub">—</span>'}</td>`; }).join('')}</tr>`; }).join('');
+  }
+  return `<section class="card" ${cc('comp')}>${dot('comp')}
+    <h2>Comparer les scénarios — ${esc(ses().nom)}</h2>
+    <ul class="bref">${bref.map(x => `<li>${x}</li>`).join('')}</ul>
+    <div class="cgrid">${cartes}</div>
+    <h3 style="margin-top:22px">Ce qui change d'un scénario à l'autre</h3><div class="sub">En clair : les cours qui diffèrent. En pâle : identiques partout.</div>
+    <div style="overflow-x:auto;margin-top:8px"><table class="cmp">
+    <thead><tr><th></th>${L.map(x => `<th class="r" ${cc('sc-' + x.sc.id)}><span class="no">${noSc(x.sc)}</span> ${esc(x.sc.nom)}</th>`).join('')}</tr></thead>
+    <tbody>${lignes}
+      ${L.some(x => x.r.ciAutres) ? (() => { const v = L.map(x => f2(x.r.ciAutres)); return `<tr class="${new Set(v).size > 1 ? 'diff' : 'same'}"><td><b>Autres éléments</b> <span class="sub">coordination, PVRTT…</span></td>${L.map(x => `<td class="r">${x.r.ciAutres ? `<b>${f2(x.r.ciAutres)}</b>` : '<span class="sub">—</span>'}</td>`).join('')}</tr>`; })() : ''}
+      <tr class="tot"><td>Total</td>${L.map(x => `<td class="r">${fn(x.r.heures)} h · ${x.r.inconnus.length ? '≥ ' : ''}${f2(x.r.ci)}</td>`).join('')}</tr>
+      <tr><td class="sub">Facteur HP</td>${L.map(x => `<td class="r sub">${fn(x.r.F)} (${pl(x.r.nPrep, 'cours de groupe')})</td>`).join('')}</tr>
+    </tbody></table></div>
+  </section>`;
+}
+
+// ----- Onglet Cours : Programme → Offerts → Je les prends -----
+function vueCours() {
+  const q = (S.cherche || '').toLowerCase();
+  const ok = c => !q || [c.code, c.abbr, c.titre, c.usage].join(' ').toLowerCase().includes(q);
+  const verrou = !!ses().verrou;
+  const prog = S.cours.filter(c => !off(c.id) && ok(c));
+  const ligneProg = c => `<div class="brow" style="--cat:${CAT[c.type][1]}" ${verrou ? '' : `draggable="true" data-drag="prog:${c.id}"`} data-a="edit" data-k="${c.id}" title="Cliquer pour voir ou modifier la fiche">
+      <div class="nm"><b>${esc(c.abbr)}</b> ${c.statut !== 'officiel' ? badge(c.statut) : ''}<small>${esc(c.titre)}${c.code ? ' · ' + esc(c.code) : ''}${c.discipline ? ' · disc. ' + esc(discNom(c.discipline)) : ''}</small></div>
+      ${verrou ? '' : `<button class="mini" data-a="offrir" data-k="${c.id}">Offert →</button>`}</div>`;
+  const ligneOffre = c => {
+    const o = off(c.id), coll = c.type === 'collectif', n = maxDe(c);
+    const quoi = coll ? `${pl(n, 'groupe')} de ${fn(c.hg || 1)} h · ${o.n ?? '?'} étudiants par groupe` : `${pl(n, unite(c))} offert${n > 1 ? 's' : ''}`;
+    if (verrou) return `<div class="brow fixe" style="--cat:${CAT[c.type][1]}"><div class="nm"><b>${esc(c.abbr)}</b>${o.ferme ? PRIO : ''}<small>${esc(c.usage || c.titre)}${c.code ? ' · ' + esc(c.code) : ''}</small></div><span class="qte">${quoi}</span></div>`;
+    return `<div class="brow edit" style="--cat:${CAT[c.type][1]}" draggable="true" data-drag="offre:${c.id}">
+      <div class="nm"><b>${esc(c.abbr)}</b><small>${esc(c.usage || c.titre)}</small>
+        <div class="orow"><div class="step"><button data-a="om" data-k="${c.id}" ${n <= 1 ? 'disabled' : ''}>−</button><span>${n}</span><button data-a="op" data-k="${c.id}">+</button></div><span class="sub">${coll ? `groupe${n > 1 ? 's' : ''}` : `${unite(c)}${n > 1 ? 's' : ''}`}</span>
+        ${coll ? `<label class="eff"><input class="inp sm" placeholder="?" value="${o.n ?? ''}" data-ch="oeff" data-k="${c.id}"> étud./gr.</label>` : ''}
+        <button class="tagb ${o.ferme ? 'on' : ''}" data-a="ferme" data-k="${c.id}" title="Ta priorité : gardée dans tes scénarios de base (ton choix, pas une règle)">priorité</button></div></div>
+      <button class="x" data-a="desoffrir" data-k="${c.id}" title="Pas offert finalement">×</button></div>`;
+  };
+  const parType = (l, f) => ORDRE.map(t => { const x = l.filter(c => c.type === t); return x.length ? `<h3>${CAT[t][0]}</h3>${x.map(f).join('')}` : ''; }).join('');
+  return `<div class="board deux ${S.progReplie ? 'pr' : ''}">
+    ${S.progReplie ? `<section class="card replie" data-a="progr" title="Ouvrir le programme"><span class="cn">1</span><span class="vtxt">Programme ›</span></section>` : `<section class="card" ${cc('col-prog')} data-zone="prog">${dot('col-prog')}
+      <div class="colh"><span class="cn">1</span><div style="flex:1"><h2>Programme</h2><div class="sub">Tous les cours possibles</div></div><button class="hb" data-a="progr" title="Replier le programme">‹ Replier</button></div>
+      <div style="display:flex;gap:8px;margin:12px 0 4px"><input class="inp" placeholder="Chercher…" value="${esc(S.cherche || '')}" data-ch="cherche"><button class="btn" data-a="nouveau">+ Cours</button></div>
+      ${verrou ? '<div class="hint">🔒 L\'offre est verrouillée. Clique « Modifier l\'offre » pour y ajouter un cours.</div>' : ''}
+      ${prog.length ? parType(prog, ligneProg) : `<div class="vide-z" style="height:120px">${q ? 'Rien trouvé.' : 'Tous les cours sont offerts.'}</div>`}
+    </section>`}
+    <section class="card ${verrou ? '' : 'modif'}" ${cc('col-offre')} data-zone="offre">${dot('col-offre')}
+      <div class="colh"><span class="cn">2</span><div style="flex:1"><h2>Offerts</h2><div class="sub">L'offre officielle pour ${esc(ses().nom)} — rien à choisir ici</div></div></div>
+      <button class="lockb ${verrou ? 'on' : ''}" data-a="verrou">${verrou ? '🔒 Offre verrouillée · <u>Modifier l\'offre</u>' : '🔓 Modification de l\'offre · <u>Verrouiller</u>'}</button>
+      ${verrou ? '' : '<div class="hint">Entre exactement ce qu\'on t\'offre (feuille de la coordo), puis verrouille pour ne plus le changer par erreur.</div>'}
+      ${offerts().length ? parType(offerts(), ligneOffre) : '<div class="vide-z" style="height:160px">Glisse ici les cours qu\'on t\'offre<br>(ou « Offert → »)</div>'}
+      ${offerts().length ? `<button class="btn pri" style="margin-top:16px;width:100%" data-a="tab" data-k="sc">Faire mes scénarios avec cette offre →</button>` : ''}
+    </section>
+  </div>`;
+}
+
+function editeur(c) {
+  const sel = (k, opts) => `<select class="inp" data-ce="${k}">${Object.entries(opts).map(([v, t]) => `<option value="${v}" ${c[k] === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+  const txt = (k, lab, ph = '') => `<div class="fld"><label>${lab}</label><input class="inp" data-ce="${k}" value="${esc(c[k] ?? '')}" placeholder="${ph}"></div>`;
+  const col = c.type === 'collectif';
+  return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><h2 style="flex:1">${esc(c.abbr || 'Nouveau cours')}</h2><button class="btn ghost" data-a="close">Fermer</button></div>
+    <div class="sub" style="margin-bottom:18px">Fiche du cours dans le programme (vaut pour toutes les sessions).</div>
+    <div class="fld2">${txt('abbr', 'Code abrégé', '2C1')}${txt('code', 'Sigle officiel', '551-2C1-JO')}</div>
+    ${txt('titre', 'Titre officiel')}${txt('usage', 'Titre d\'usage (comment tu l\'appelles)')}
+    <div class="fld2"><div class="fld"><label>Type</label>${sel('type', TYPES)}</div><div class="fld"><label>Statut du sigle</label>${sel('statut', STAT)}</div></div>
+    ${col ? `<div class="fld2">${txt('hg', 'Heures par groupe / semaine', '2')}${txt('hp', 'HP (heures de préparation)', '2')}</div>${txt('prep', 'Clé de préparation (même clé = même préparation)', c.code || c.abbr)}`
+      : txt('h', 'Heures par élève / semaine', '1')}
+    <div class="fld2"><div class="fld"><label>Discipline</label><input class="inp" list="disc-l" data-ce="discipline" value="${esc(c.discipline || '')}" placeholder="25"><datalist id="disc-l">${Object.entries(DISC).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('')}</datalist><small class="sub">${esc(DISC[c.discipline] || '')}</small></div><div class="fld"><label>Pris avec (lié)</label><select class="inp" data-ce="lien"><option value="">—</option>${S.cours.filter(x => x.id !== c.id && x.type === 'collectif').map(x => `<option value="${x.id}" ${c.lien === x.id ? 'selected' : ''}>${esc(x.abbr)}</option>`).join('')}</select></div></div>
+    <div class="fld"><label>Notes</label><textarea class="inp" data-ce="notes" rows="3">${esc(c.notes || '')}</textarea></div>
+    <button class="btn" style="color:var(--bad);margin-top:8px" data-a="supcours">Supprimer ce cours du programme</button>`;
+}
+
+// Feuilles « Tâche d'enseignement en musique — A26 » reçues du département
+const L = (abbr, code, titre, type, qte) => ({ abbr, code, titre, type, qte });
+const ENS = { abbr: 'ENS AJ', code: '551-ENS-AJ', titre: 'Ensemble accompagnement JP', type: 'collectif', hp: 1, prep: 'ENS', groupes: [{ n: 2, h: 1 }, { n: 2, h: 1 }] };
+const A26V = [
+  { id: 'sept', date: '23 septembre 2026', etat: 'Officielle', statut: 'officiel', total: 41.26, pct: 103, F: null,
+    note: 'Version officielle de la session (après le 20 septembre, date de référence).',
+    lignes: [L('1C1', '551-1C1-JO', 'Instrument complémentaire I', 'complementaire', 6), L('2C1', '551-2C1-JO', 'Instrument complémentaire II', 'complementaire', 3),
+      L('3C1', '551-3C1-JO', 'Instrument complémentaire III', 'complementaire', 3), L('C41', '551-C41-JO', 'Instrument complémentaire IV', 'complementaire', 1),
+      L('C51', '551-C51-JO', 'Instrument complémentaire V', 'complementaire', 2), L('1P2', '551-1P2-JO', 'Instrument principal I', 'principal', 3),
+      L('3P2', '551-3P2-JO', 'Instrument principal III', 'principal', 1), L('P59', '551-P59-JO', 'Instrument principal V', 'principal', 2),
+      L('Labo', '551-PIA-JP', 'Instrument labo', 'labo', 0), ENS] },
+  { id: 'mai', date: '8 mai 2026', etat: 'Préliminaire', statut: 'estime', total: 41.46, pct: 104, F: 1.1,
+    note: 'Estimation avant la session. Facteur HP affiché : 1,1 (disparu dans la version officielle).',
+    lignes: [L('1C1', '551-1C1-JO', 'Instrument complémentaire I', 'complementaire', 5), L('2C1', '551-2C1-JO', 'Instrument complémentaire II', 'complementaire', 3),
+      L('3C1', '551-3C1-JO', 'Instrument complémentaire III', 'complementaire', 4), L('4C1', '551-4C1-JO', 'Instrument complémentaire IV', 'complementaire', 1),
+      L('C51', '551-C51-JO', 'Instrument complémentaire V', 'complementaire', 2), L('1P2', '551-1P2-JO', 'Instrument principal I', 'principal', 3),
+      L('3P2', '551-3P2-JO', 'Instrument principal III', 'principal', 1), L('P59', '551-P59-JO', 'Instrument principal V', 'principal', 2),
+      L('Labo', '551-PIA-JP', 'Instrument labo', 'labo', 0), ENS] },
+];
+const optsV = v => v.F ? { fMode: 'manuel', fManuel: v.F } : {};
+
+function etapes(r, sc) {
+  const S_ = [];
+  const st = (t, f, v, cls = '') => S_.push(`<div class="st ${cls}"><div class="n">${S_.length + 1}</div><div><div class="t">${t}</div><div class="f">${f}</div></div><div class="v">${v}</div></div>`);
+  st('Instruments individuels', `<span class="mono">${r.princH} h principal + ${r.compH} h complémentaire = ${r.indivH} h × 1,8</span><br><small>Valeur fixe prévue pour la musique. Ne compte pas dans les préparations.</small>`, f2(r.ciInd));
+  if (r.laboH) st('Laboratoire', `<span class="mono">${r.laboH} h × 2,0</span>`, f2(r.ciLabo));
+  const F = [[1, '1–2 : 0,9'], [3, '3 : 1,1'], [4, '4+ : 1,75']];
+  const fOn = n => n <= 2 ? 1 : n === 3 ? 3 : 4;
+  st('Préparations distinctes → facteur HP', `${r.preps.length ? r.preps.map(p => `<span class="chip">${esc(p.nom)}</span>`).join(' ') : 'Aucun cours de groupe'} = <b>${r.nPrep}</b><br>
+    <div class="ftab">${F.map(([n, t]) => `<span class="${r.nPrep && fOn(r.nPrep) === n ? 'on' : ''}">${t}</span>`).join('')}</div>
+    ${r.manuel ? `<br><small>⚑ Remplacé manuellement par <b>${fn(r.F)}</b>${sc.fRaison ? ' — ' + esc(sc.fRaison) : ''}</small>` : ''}`, 'F = ' + fn(r.F));
+  st('HP — heures de préparation', `<span class="mono">(${r.preps.map(p => fn(p.hp)).join(' + ') || '0'}) h × ${fn(r.F)}</span><br><small>Un même cours donné à plusieurs groupes = une seule préparation.</small>`, f2(r.ciHP));
+  st('HC — heures en classe', `<span class="mono">${r.groupes.map(g => fn(g.h)).join(' + ') || '0'} = ${fn(r.HC)} h × 1,2</span>`, f2(r.ciHC));
+  st('PES — périodes-étudiants', `<span class="mono">${r.groupes.map(g => `${g.n == null ? '?' : g.n}×${fn(g.h)}`).join(' + ') || '0'} = ${fn(r.PES)} × 0,04</span>${r.inconnus.length ? `<br><small>? = effectif inconnu, compté 0 pour l'instant.</small>` : ''}${r.PES > 415 ? '<br><small>Au-delà de 415 PES : 0,07.</small>' : ''}`, f2(r.ciPES));
+  if (r.ciAutres) st('Autres éléments (CI fixe)', `<span class="mono">${r.autres.map(a => `${esc(a.nom)} ${f2(a.ci)}`).join(' + ')}</span><br><small>Sans heures devant étudiants.</small>`, f2(r.ciAutres));
+  st('CI de la session', `<span class="mono">${f2(r.ciInd)}${r.laboH ? ' + ' + f2(r.ciLabo) : ''} + ${f2(r.ciHP)} + ${f2(r.ciHC)} + ${f2(r.ciPES)}${r.ciAutres ? ' + ' + f2(r.ciAutres) : ''}</span>`, (r.inconnus.length ? '≥ ' : '') + f2(r.ci), 'tot');
+  st('Pourcentage indicatif', `<span class="mono">${f2(r.ci)} ÷ ${S.cible} × 100</span><br><small>Repère seulement. Le % officiel est celui du contrat.</small>`, fn(Math.round(r.ci / S.cible * 100)) + ' %');
+  st('Heures devant étudiants', `<span class="mono">${fn(r.indivH)} h individuelles + ${fn(r.HC)} h de groupe</span><br><small>${f2(r.heures ? r.ci / r.heures : 0)} CI par heure.</small>`, fn(r.heures) + ' h');
+  return `<div class="steps">${S_.join('')}</div>`;
+}
+
+// ===== Feuilles officielles : mon choix, présenté comme la feuille du département =====
+function vueFeuilles() {
+  const ch = scRetenu();
+  const recues = ses().id === 'A26' ? `<h2 class="titre-sec">Feuilles reçues du département</h2>${vueA26()}` : '';
+  if (!ch) return `<section class="card vide-z" style="height:auto;padding:40px;text-align:center;margin-bottom:18px"><div>
+      <h2>Pas encore de choix pour ${esc(ses().nom)}</h2><div class="sub" style="margin:6px 0 14px">Choisis un scénario (bouton « Choisir ce scénario » ou dans Comparer) : sa feuille s'affichera ici.</div>
+      <button class="btn pri" data-a="tab" data-k="sc">Aller aux scénarios →</button></div></section>` + recues;
+  const r = calc(ch), off26 = ses().id === 'A26' ? A26V[0] : null, egal = off26 && Math.abs(r.ci - off26.total) < 0.005;
+  return `<section class="card feuille" ${cc('feuille')}>${dot('feuille')}
+    ${off26 ? `<div class="note ${egal ? 'ok' : 'bad'}" style="margin:0 0 14px">${egal ? '✓' : '✕'} <div>${egal ? 'Identique à' : 'Différent de'} la feuille officielle du ${off26.date} (${f2(off26.total)} CI).</div></div>` : ''}
+    ${feuilleHTML(ch)}
+    <div style="display:flex;gap:8px;margin-top:14px"><button class="btn pri" data-a="apercu">Aperçu <span class="kbd">⌘E</span></button><button class="btn" data-a="pdf">Imprimer / PDF</button><button class="btn ghost" data-a="voir" data-k="${ch.id}">Modifier ce scénario →</button></div>
+  </section>${recues}`;
+}
+// La feuille elle-même (écran, aperçu et PDF)
+function feuilleHTML(ch) {
+  const r = calc(ch), pc = ciParCours(ch);
+  const ordre = ['complementaire', 'principal', 'labo', 'collectif'];
+  const nom = { complementaire: 'Instrument compl.', principal: 'Instrument princ.', labo: 'Instrument labo' };
+  const lignes = ordre.flatMap(t => S.cours.filter(c => c.type === t && pris(ch, c)).map(c => {
+    const q = pris(ch, c), v = pc[c.id];
+    if (t !== 'collectif') return `<tr><td>${nom[t]}</td><td class="r">${esc(c.discipline || '')}</td><td class="mono">${esc(c.code || c.abbr)}</td><td class="r">${fn(v.h)}</td><td class="gris" colspan="4"></td><td class="r"><b>${f2(v.ci)}</b></td></tr>`;
+    const n = off(c.id).n, et = n == null ? '?' : n * q, pes = n == null ? '?' : fn(n * q * (c.hg || 1));
+    return `<tr class="gr"><td>${esc(c.usage || c.titre)}</td><td class="r">${esc(c.discipline || '')}</td><td class="mono">${esc(c.code || c.abbr)}</td><td class="r">${fn(v.h)}</td><td class="r">${fn(c.hp || 0)}</td><td class="r">${q}</td><td class="r">${et}</td><td class="r">${pes}</td><td class="r"><b>${v.inc ? '≥ ' : ''}${f2(v.ci)}</b></td></tr>`;
+  })).join('');
+  return `<div class="f-tete"><div><div class="tag">Tâche d'enseignement en musique — ${esc(ses().nom)}</div><h2>${esc(ch.nom)}</h2><div class="sub">Scénario ${noSc(ch)} · mon choix · simulation calculée par l'outil</div></div>${duo(r, 'sm')}</div>
+    ${r.inconnus.length ? `<div class="note warn">◔ <div>Nombre d'étudiants inconnu : <b>${r.inconnus.join(', ')}</b>. Les chiffres marqués « ≥ » sont des minimums.</div></div>` : ''}
+    <div style="overflow-x:auto;margin-top:12px"><table class="dept"><thead><tr><th>Cours</th><th class="r">Discipline</th><th>Sigle</th><th class="r">Hc</th><th class="r">Hp</th><th class="r">N. Gr</th><th class="r">N. Ét</th><th class="r">PES</th><th class="r">CIM</th></tr></thead>
+    <tbody>${lignes}${r.autres.map(a => `<tr class="aut"><td>${esc(a.nom)}</td><td colspan="7" class="sub">CI fixe</td><td class="r"><b>${f2(a.ci)}</b></td></tr>`).join('')}</tbody>
+    <tfoot><tr><td colspan="3">Facteur HP : <b>${fn(r.F)}</b></td><td class="r"><b>${fn(r.heures)}</b></td><td colspan="4" class="sub">total heures</td><td></td></tr>
+      <tr class="tot"><td colspan="8" class="r">CIM totale</td><td class="r">${r.inconnus.length ? '≥ ' : ''}${f2(r.ci)}</td></tr>
+      <tr><td colspan="8" class="r">% de tâche</td><td class="r">${r.inconnus.length ? '≥ ' : ''}${fn(Math.round(r.ci / S.cible * 100))}</td></tr>
+      ${autresAnnee().length ? `<tr class="an"><td colspan="8" class="r">CI année (${esc(ses().annee)})${autresAnnee().some(x => x.ci == null) ? ' · une session pas encore choisie' : ''}</td><td class="r">${r.inconnus.length ? '≥ ' : ''}${f2(ciAnnee(r))}</td></tr><tr class="an"><td colspan="8" class="r">% de tâche année</td><td class="r">${r.inconnus.length ? '≥ ' : ''}${fn(Math.round(ciAnnee(r) / (2 * S.cible) * 100))} %</td></tr>` : ''}
+      ${garde() < 100 ? `<tr><td colspan="8" class="r sub">Tâche visée ici (scission)</td><td class="r sub">${fn(garde())} %</td></tr>` : ''}</tfoot></table></div>
+    <div class="f-pied">Simulation produite avec ctmCI selon l'annexe I-1 (FNEEQ 2023-2028). Document de travail — la feuille officielle du département fait foi.</div>`;
+}
+// Aperçu (⌘E) : la feuille sur une page blanche, format lettre paysage
+function apercu() {
+  const ch = scRetenu();
+  if (!ch) return toast('Choisis d\'abord un scénario (« Choisir ce scénario »)');
+  $('#apercu').innerHTML = `<div class="ap-bar"><b>Aperçu</b><span class="sub">Lettre · paysage · ${esc(ses().nom)}</span><div class="sp"></div>
+      <button class="btn pri" data-a="pdf">Imprimer / PDF</button><button class="btn" data-a="apfermer">Fermer <span class="kbd">Échap</span></button></div>
+    <div class="ap-fond" data-a="apfermer"><div class="ap-page" onclick="event.stopPropagation()">${feuilleHTML(ch)}</div></div>`;
+  $('#apercu').classList.add('on');
+}
+const apFermer = () => $('#apercu').classList.remove('on');
+
+function vueA26() {
+  const v = A26V.find(x => x.id === S.a26v) || A26V[0];
+  const r = CI.calcule(v.lignes, optsV(v));
+  const ok = Math.abs(r.ci - v.total) < 0.005;
+  const ens = CI.calcule(v.lignes.filter(l => l.type === 'collectif'), optsV(v));
+  // Différences entre la version préliminaire et l'officielle (par titre de cours)
+  const [o, p] = [A26V[0], A26V[1]], ro = CI.calcule(o.lignes, optsV(o)), rp = CI.calcule(p.lignes, optsV(p));
+  const diffs = o.lignes.map(l => { const q = p.lignes.find(x => x.titre === l.titre); const d = [];
+      if (q && l.type !== 'collectif' && q.qte !== l.qte) d.push(`${fn(q.qte)} h → <b>${fn(l.qte)} h</b> (${l.qte > q.qte ? '+' : ''}${f2((l.qte - q.qte) * CI.IND)} CI)`);
+      if (q && q.code !== l.code) d.push(`sigle ${q.code} → <b>${l.code}</b>`);
+      return d.length ? `<div class="row"><div class="nm"><b>${esc(l.titre)}</b></div><span class="sub">${d.join(' · ')}</span></div>` : ''; }).join('');
+  return `<div class="pills" style="margin-bottom:16px">${A26V.map(x => `<button class="pill ${x.id === v.id ? 'on' : ''}" data-a="a26v" data-k="${x.id}">${x.date} · ${x.etat}</button>`).join('')}</div>
+  <div class="grid">
+  <section class="card" ${cc('a26')}>${dot('a26')}
+    <div style="display:flex;gap:10px;align-items:center;padding-right:18px"><h2 style="flex:1">Tâche d'enseignement en musique — A26</h2>${badge(v.statut)}</div>
+    <div class="sub">Feuille du ${v.date}. ${v.note}</div>
+    <div class="note ${ok ? 'ok' : 'bad'}" style="margin-top:14px">${ok ? '✓' : '✕'} <div>Le calculateur ${ok ? 'reproduit' : 'ne reproduit pas'} le total de la feuille : <b>${f2(r.ci)}</b> CI (feuille : ${f2(v.total)}).</div></div>
+    <table style="margin-top:12px"><thead><tr><th>Cours</th><th>Sigle</th><th class="r">Hc</th><th class="r">Hp</th><th class="r">N. Gr</th><th class="r">N. Ét</th><th class="r">PES</th><th class="r">CIM</th></tr></thead><tbody>
+    ${v.lignes.map(l => { const x = CI.calcule([l], optsV(v)); const col = l.type === 'collectif';
+      return `<tr><td>${esc(l.titre)}</td><td class="mono">${l.code}</td><td class="r">${fn(x.heures)}</td>
+        <td class="r sub">${col ? fn(x.HP) : ''}</td><td class="r sub">${col ? l.groupes.length : ''}</td><td class="r sub">${col ? l.groupes.reduce((a, g) => a + g.n, 0) : ''}</td><td class="r sub">${col ? fn(x.PES) : ''}</td>
+        <td class="r">${f2(x.ci)}</td></tr>`; }).join('')}
+    <tr class="tot"><td>Total</td><td class="sub" style="font-weight:400">Facteur HP : ${fn(r.F)}</td><td class="r">${fn(r.heures)}</td><td colspan="4"></td><td class="r">${f2(r.ci)}</td></tr></tbody></table>
+  </section>
+  <div class="grid cols">
+  <section class="card" ${cc('a26-ens')}>${dot('a26-ens')}
+    <h2>ENS AJ, étape par étape</h2><div class="sub">Le seul cours de groupe : 1 préparation → F = 0,9 selon la convention.</div>
+    <div class="steps">
+      <div class="st"><div class="n">1</div><div><div class="t">HP × F</div><div class="f mono">1 × ${fn(ens.F)}</div></div><div class="v">${f2(ens.ciHP)}</div></div>
+      <div class="st"><div class="n">2</div><div><div class="t">HC × 1,2</div><div class="f mono">2 × 1,2</div></div><div class="v">${f2(ens.ciHC)}</div></div>
+      <div class="st"><div class="n">3</div><div><div class="t">PES × 0,04</div><div class="f mono">(2×1 + 2×1) = 4 × 0,04</div></div><div class="v">${f2(ens.ciPES)}</div></div>
+      <div class="st tot"><div class="n">=</div><div><div class="t">CI ENS AJ</div></div><div class="v">${f2(ens.ci)}</div></div>
+    </div>
+  </section>
+  <section class="card" ${cc('a26-pct')}>${dot('a26-pct')}
+    <h2>Pourcentages</h2>
+    <div class="row"><div class="nm">% indicatif (CI ÷ 40)</div><b class="num">${f2(r.ci / 40 * 100)} %</b></div>
+    <div class="row"><div class="nm">% de tâche sur la feuille</div><b class="num">${v.pct} %</b></div>
+    <div class="row"><div class="nm">% de tâche année (feuille)</div><b class="num">52 %</b></div>
+    <div class="row"><div class="nm">Au contrat ${badge('officiel')}</div><input class="inp sm" value="${esc(S.a26.contrat)}" data-ch="a26c"></div>
+    <div class="note">ⓘ <div>La feuille arrondit CI ÷ 40 (${f2(r.ci / 40 * 100)} → ${v.pct} %). Écart avec 1,0 au contrat : explication à obtenir.</div></div>
+  </section></div>
+  <section class="card" ${cc('a26-diff')}>${dot('a26-diff')}
+    <h2>Du 8 mai au 23 septembre : ce qui a changé</h2><div class="sub">Total : ${f2(rp.ci)} → <b>${f2(ro.ci)}</b> CI (${f2(ro.ci - rp.ci)}). Les heures restent à ${fn(ro.heures)}.</div>
+    <div style="margin-top:8px">${diffs}
+      <div class="row"><div class="nm"><b>Facteur HP</b></div><span class="sub">1,1 → <b>0,9</b> · ENS AJ ${f2(CI.calcule([ENS], optsV(p)).ci)} → <b>${f2(CI.calcule([ENS]).ci)}</b> CI (−0,20)</span></div></div>
+  </section></div>`;
+}
+
+
+// ===== Tiroir, menus, pastille couleur =====
+let edite = null;
+function ouvrir(id) { edite = id; $('#drawer').innerHTML = editeur(cours(id)); $('#drawer').classList.add('on'); $('#scrim').classList.add('on'); }
+function fermer() { edite = null; $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); }
+const fermePop = () => $('#pop').classList.remove('on');
+function placerPop(btn) {
+  const p = $('#pop'), b = btn.getBoundingClientRect();
+  p.style.top = Math.min(innerHeight - 160, b.bottom + 6) + 'px'; p.style.left = Math.max(8, Math.min(innerWidth - 252, b.right - 244)) + 'px';
+  p.classList.add('on');
+}
+const mi = (a, t, sid = '', st = '') => `<button class="mi" data-a="${a}" data-s="${sid}" style="${st}">${t}</button>`;
+function menuScenario(btn, sc) {
+  $('#pop').innerHTML = mi('renommer', 'Renommer', sc.id) + mi('dup', 'Dupliquer', sc.id)
+    + mi('retenir', ses().retenu === sc.id ? 'Je ne prends plus celui-ci' : '★ Je prends celui-ci', sc.id)
+    + (scs().length > 1 ? '<div class="sep"></div>' + mi('del', 'Supprimer…', sc.id, 'color:var(--bad)') : '');
+  placerPop(btn);
+}
+// Menu des sessions : la liste, puis « Nouvelle session » (nom tapé sur place)
+function menuSessions(btn) {
+  const suiv = (() => { const m = /(automne|hiver)\s*(\d{4})/i.exec(S.sessions[S.sessions.length - 1].nom); if (!m) return ''; const y = +m[2]; return /automne/i.test(m[1]) ? `Hiver ${y + 1}` : `Automne ${y}`; })();
+  $('#pop').innerHTML = `<div class="tag" style="padding:4px 10px">Sessions</div>`
+    + S.sessions.map(x => `<button class="mi ${x.id === ses().id ? 'on' : ''}" data-a="sess" data-k="${x.id}"><span style="width:16px;display:inline-block">${x.id === ses().id ? '✓' : ''}</span>${esc(x.nom)} ${x.role ? `<span class="sub">· ${x.role}</span>` : ''}</button>`).join('')
+    + `<div class="sep"></div><div class="tag" style="padding:4px 10px">Nouvelle session</div>
+      <div class="ns"><input class="inp" id="ns-nom" placeholder="Ex. ${esc(suiv || 'Automne 2027')}" value="${esc(suiv)}"><button class="btn pri" data-a="newsess">Créer</button></div>`;
+  placerPop(btn);
+  setTimeout(() => { const i = $('#ns-nom'); i && i.addEventListener('keydown', e => { if (e.key === 'Enter') creerSession(); }); }, 0);
+}
+function creerSession() {
+  const nom = ($('#ns-nom')?.value || '').trim();
+  if (!nom) return toast('Donne un nom à la session (ex. Automne 2027)');
+  const id = 's' + Date.now().toString(36);
+  S.sessions.push({ id, nom, annee: anneeDe(nom), role: '', verrou: false, voir: null, retenu: null, offre: {}, scenarios: [] });
+  S.sess = id; S.tab = 'cours'; fermePop(); render();
+  toast(`Session « ${nom} » créée — entre l'offre dans Cours`);
+}
+function menuNouveau(btn) {
+  const sc = scActif();
+  $('#pop').innerHTML = `<div class="tag" style="padding:4px 10px">Nouveau scénario</div>` + mi('vide', 'Vide — je pars de zéro') + mi('basesc', 'Avec mes priorités seulement')
+    + (sc ? mi('dup', `Copie de « ${esc(sc.nom)} »`, sc.id) : '');
+  placerPop(btn);
+}
+let popK = null;
+function popOuvrir(btn, k) {
+  popK = k;
+  const cur = k === 'accent' ? S.accent : S.couleurs[k] || '#5b6cff';
+  $('#pop').innerHTML = `<div class="sw">${PALETTE.map(c => `<button style="background:${c}" data-a="col" data-c="${c}" title="${c}"></button>`).join('')}</div>
+    <div class="foot"><input type="color" value="${cur}" data-ch="colin"><span class="sub" style="flex:1">Toutes les couleurs</span>${k !== 'accent' ? '<button class="lnk" data-a="col" data-c="">Aucune</button>' : ''}</div>`;
+  placerPop(btn);
+}
+function setCouleur(c) {
+  if (popK === 'accent') S.accent = c || '#5b6cff';
+  else if (c) S.couleurs[popK] = c; else delete S.couleurs[popK];
+  render();
+}
+
+// ===== Actions =====
+function ajouter(sc, k) {
+  const ok = !!sc && plus1(sc.sel, k);
+  if (ok) dernier = k; else toast(`${cours(k).abbr} : tout est déjà pris`);
+  render(); dernier = null; return ok;
+}
+function offrir(k) { const c = cours(k); ses().offre[k] = c.type === 'collectif' ? { gr: 1, n: null } : { n: 1 }; dernier = k; render(); dernier = null; }
+function desoffrir(k) {
+  delete ses().offre[k]; scs().forEach(s => delete s.sel[k]); render(); toast(`${cours(k).abbr} retiré de l'offre — ⌘Z pour annuler`);
+}
+// « Ma tâche » : le scénario que je prends, créé au besoin avec mes choix fermes
+function creerMaTache() { const id = prochainId(), sc = { id, nom: 'Ma tâche', sel: {}, fMode: 'auto', fManuel: '' }; scs().push(sc); ses().retenu = id; ses().voir = ses().voir || id; return sc; }
+function prendre(k) { const sc = scRetenu() || creerMaTache(); if (ajouter(sc, k)) toast(`${cours(k).abbr} ajouté à « ${sc.nom} »`); }
+// ===== Sauvegarde dans un fichier (pour ne jamais perdre tes données) =====
+function sauver() {
+  const d = new Date(), j = d.toISOString().slice(0, 10);
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `ctmCI-${j}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast(`Sauvegardé : ctmCI-${j}.json (dossier Téléchargements)`);
+}
+document.addEventListener('change', e => {
+  if (e.target.id !== 'fichier' || !e.target.files[0]) return;
+  const f = e.target.files[0], lu = new FileReader();
+  lu.onload = () => {
+    try {
+      const o = JSON.parse(lu.result);
+      if (!o || o.v !== 2 || !Array.isArray(o.sessions) || !Array.isArray(o.cours)) throw new Error('format');
+      S = Object.assign(DEFAUT(), o); fermer(); render();
+      toast(`Données récupérées de « ${f.name} » — ⌘Z pour annuler`);
+    } catch (err) { toast('Ce fichier n\'est pas une sauvegarde de ctmCI'); }
+    e.target.value = '';
+  };
+  lu.readAsText(f);
+});
+function voirScenario(id) { ses().voir = id; S.comp = false; S.tab = 'sc'; }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-a]');
+  if (!e.target.closest('#pop') && !(t && ['pop', 'menu', 'newmenu', 'sessmenu'].includes(t.dataset.a))) fermePop();
+  if (!t) return;
+  const a = t.dataset.a, k = t.dataset.k, sc = t.dataset.s ? scById(t.dataset.s) : scActif();
+  switch (a) {
+    case 'tab': S.tab = k; fermer(); break;
+    case 'theme': S.theme = k; break;
+    case 'sess': S.sess = k; S.comp = false; fermePop(); break;
+    case 'sessmenu': return menuSessions(t);
+    case 'newsess': return creerSession();
+    case 'voir': voirScenario(k); break;
+    case 'a26v': S.a26v = k; break;
+    case 'comp': S.comp = !S.comp; break;
+    case 'retenir': ses().retenu = ses().retenu === sc.id ? null : sc.id; fermePop(); if (ses().retenu) toast(`« ${sc.nom} » est ton choix — voir l'onglet Feuilles officielles`); break;
+    case 'menu': return menuScenario(t, sc);
+    case 'newmenu': return menuNouveau(t);
+    case 'renommer': fermePop(); voirScenario(sc.id); render(); { const n = $('.ttl-in'); n.focus(); n.select(); } return;
+    case 'vide': fermePop(); return nouveauScenario('Nouveau scénario', {});
+    case 'basesc': fermePop(); return nouveauScenario('Priorités + …', selFermes());
+    case 'dup': fermePop(); return nouveauScenario(sc.nom + ' (copie)', JSON.parse(JSON.stringify(sc.sel)));
+    case 'del': fermePop(); toast(`Scénario « ${sc.nom} » supprimé — ⌘Z pour annuler`);
+      ses().scenarios = scs().filter(s => s !== sc); if (ses().retenu === sc.id) ses().retenu = null; ses().voir = scs()[0]?.id; break;
+    case 'plus': return ajouter(sc, k);
+    case 'moins': moins1(sc.sel, k); break;
+    case 'ajoute': return ajouter(scActif(), k);
+    case 'retire': moins1(sc.sel, k, true); break;
+    case 'calc': S.calcOuvert = !S.calcOuvert; break;
+    case 'ajusterF': S.ajusterF = true; break;
+    case 'edit': return ouvrir(k);
+    case 'close': return fermer();
+    case 'nouveau': { const id = 'c' + Date.now().toString(36); S.cours.push(C(id, '', '', '', 'complementaire')); render(); return ouvrir(id); }
+    case 'supcours': toast(`${cours(edite).abbr || 'Cours'} supprimé du programme — ⌘Z pour annuler`);
+      S.cours = S.cours.filter(c => c.id !== edite); S.sessions.forEach(x => { delete x.offre[edite]; x.scenarios.forEach(s => delete s.sel[edite]); }); fermer(); break;
+    case 'offrir': return offrir(k);
+    case 'desoffrir': return desoffrir(k);
+    case 'ferme': off(k).ferme = !off(k).ferme; break;
+    case 'verrou': ses().verrou = !ses().verrou; break;
+    case 'pdf': if (!$('#apercu').classList.contains('on')) apercu(); if (!scRetenu()) return; document.body.classList.add('pf'); setTimeout(() => { print(); document.body.classList.remove('pf'); }, 60); return;
+    case 'apercu': return apercu();
+    case 'apfermer': return apFermer();
+    case 'autadd': (sc.autres = sc.autres || []).push({ lib: k, ci: '', pct: '', unite: t.dataset.u || 'ci' }); render(); { const i = document.querySelectorAll(`[data-ch="${k ? 'autval' : 'autlib'}"][data-s="${sc.id}"]`); i[i.length - 1]?.focus(); } return;
+    case 'autu': { const a = sc.autres[+t.dataset.i], c = ciAut(a); a.unite = k; if (k === 'pct') a.pct = rond(c / S.cible * 100); else a.ci = c; break; }
+    case 'autdel': sc.autres.splice(+t.dataset.i, 1); break;
+    case 'cmode': S.cibleMode = k; break;
+    case 'sauver': return sauver();
+    case 'recup': return $('#fichier').click();
+    case 'progr': S.progReplie = !S.progReplie; break;
+    case 'vblocs': S.vueBlocs = k === '1'; break;
+    case 'lacher': moins1(scRetenu().sel, k, true); break;
+    case 'om': case 'op': { const c = cours(k), o = off(k), f = c.type === 'collectif' ? 'gr' : 'n'; o[f] = Math.max(1, (o[f] || 0) + (a === 'op' ? 1 : -1)); break; }
+    case 'prendre': return prendre(k);
+    case 'creerpris': creerMaTache(); break;
+    case 'pop': return popOuvrir(t, k);
+    case 'col': setCouleur(t.dataset.c); return fermePop();
+    default: return;
+  }
+  render();
+});
+const num = v => { v = String(v).trim().replace(',', '.'); return v === '' ? null : Number(v); };
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.ch === 'colin') { if (popK === 'accent') S.accent = t.value; else S.couleurs[popK] = t.value; render(); }
+  if (t.dataset.ch === 'cherche') { S.cherche = t.value; const p = t.selectionStart; render(); const n = $('[data-ch="cherche"]'); n.focus(); n.setSelectionRange(p, p); }
+});
+document.addEventListener('change', e => {
+  const t = e.target, d = t.dataset, sc = d.s ? scById(d.s) : scActif();
+  if (d.ch === 'oeff') { off(d.k).n = num(t.value); dernier = d.k; render(); dernier = null; return; }
+  else if (d.ch === 'garde') { const v = num(t.value); ses().garde = v == null ? 100 : Math.max(1, Math.min(100, v)); }
+  else if (d.ch === 'autlib') sc.autres[+d.i].lib = t.value;
+  else if (d.ch === 'autval') { const a = sc.autres[+d.i]; a[a.unite === 'pct' ? 'pct' : 'ci'] = num(t.value) ?? ''; }
+  else if (d.ch === 'scnom') sc.nom = t.value;
+  else if (d.ch === 'fmode') sc.fMode = t.value;
+  else if (d.ch === 'fman') sc.fManuel = num(t.value) ?? '';
+  else if (d.ch === 'retenu') ses().retenu = t.value || null;
+  else if (d.ch === 'a26c') S.a26.contrat = t.value;
+  else if (edite && d.ce) {
+    const c = cours(edite); c[d.ce] = ['hp', 'h', 'hg'].includes(d.ce) ? (num(t.value) ?? 0) : t.value;
+    if (d.ce === 'type' && t.value === 'collectif' && c.hg == null) { c.hg = 1; c.hp = 1; }
+    render(); return ouvrir(edite);
+  } else return;
+  render();
+});
+document.addEventListener('dblclick', e => {
+  const t = e.target.closest('.sct[data-a="voir"]'); if (!t) return;
+  voirScenario(t.dataset.k); render(); const n = $('.ttl-in'); n.focus(); n.select();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { fermer(); fermePop(); apFermer(); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') { e.preventDefault(); $('#apercu').classList.contains('on') ? apFermer() : apercu(); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+    const a = document.activeElement;
+    if (a && /^(INPUT|TEXTAREA)$/.test(a.tagName) && a.type !== 'color' && a.value) return; // annuler la frappe dans le champ
+    e.preventDefault(); e.shiftKey ? refaire() : annuler();
+  }
+});
+
+// ===== Glisser-déposer =====
+// Zone → sources acceptées et action
+const DEPOT = {
+  tache: { off: k => ajouter(scActif(), k) },
+  offsc: { tache: k => { moins1(scActif().sel, k); render(); } },
+  offre: { prog: k => ses().verrou ? toast('Offre verrouillée — clique « Modifier l\'offre »') : offrir(k) },
+  prog: { offre: k => ses().verrou ? toast('Offre verrouillée — clique « Modifier l\'offre »') : desoffrir(k) },
+};
+let glisse = null, appui = null;
+document.addEventListener('pointerdown', e => { appui = e.target; }, true);
+document.addEventListener('dragstart', e => {
+  if (appui && appui.closest('button, input, select, label, textarea')) { e.preventDefault(); return; } // c'était un clic
+  const o = e.target.closest('[data-drag]'); if (!o) return;
+  const [src, k] = o.dataset.drag.split(':'); glisse = { src, k };
+  e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', k);
+  document.body.dataset.glisse = src;
+  if (src === 'off') { // aperçu hachuré dans la jauge
+    const sc = scActif(), ef = effet(sc, k), g = $('#ghost'), r = calc(sc), max = Math.max(S.cible * 1.25, r.ci * 1.05);
+    if (g && ef) { g.style.width = (Math.max(0, ef.d) / max * 100) + '%'; g.style.setProperty('--cat', CAT[cours(k).type][1]); }
+  }
+});
+const finGlisse = () => { glisse = null; delete document.body.dataset.glisse; document.querySelectorAll('.over').forEach(z => z.classList.remove('over')); const g = $('#ghost'); if (g) g.style.width = '0'; };
+document.addEventListener('dragend', finGlisse);
+const zoneCible = e => { if (!glisse) return null; const z = e.target.closest('[data-zone]'); return z && DEPOT[z.dataset.zone]?.[glisse.src] ? z : null; };
+document.addEventListener('dragover', e => { const z = zoneCible(e); if (!z) return; e.preventDefault(); z.classList.add('over'); });
+document.addEventListener('dragleave', e => { const z = e.target.closest('[data-zone]'); if (z && !z.contains(e.relatedTarget)) z.classList.remove('over'); });
+document.addEventListener('drop', e => {
+  const z = zoneCible(e); if (!z) return; e.preventDefault();
+  const g = glisse; finGlisse(); DEPOT[z.dataset.zone][g.src](g.k);
+});
+render();
+</script>
+</body>
+</html>

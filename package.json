@@ -1,0 +1,54 @@
+{
+  "name": "ctmci",
+  "productName": "ctmCI",
+  "version": "1.0.0",
+  "description": "ctmCI — calculateur de charge individuelle (CI) pour comprendre sa tâche au cégep",
+  "main": "main.js",
+  "author": "Charles Trudel",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.js",
+    "pack": "npm test && electron-builder --mac dir --arm64",
+    "dist": "npm test && APPLE_KEYCHAIN_PROFILE=ctmnotes-notary electron-builder --mac dmg --arm64 --x64 && node scripts/nommer-dmg.js"
+  },
+  "devDependencies": {
+    "electron": "^44.4.5",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.charlestrudel.ctmci",
+    "productName": "ctmCI",
+    "files": [
+      "main.js",
+      "preload.js",
+      "ctmCI.html",
+      "build/**"
+    ],
+    "directories": {
+      "output": "dist-app"
+    },
+    "mac": {
+      "category": "public.app-category.education",
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "identity": "Charles Trudel (94K5PC2L26)",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "dmg": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "title": "ctmCI ${version}"
+    }
+  }
+}
