@@ -184,7 +184,6 @@ body[data-glisse="off"] .zone-tache,body[data-glisse="tache"] .zone-offre,body[d
 .lockb{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:7px 11px;margin:12px 0 4px;cursor:pointer;color:var(--muted);font-size:12.5px}
 .lockb u{color:var(--accent);text-decoration:none;font-weight:600}
 .lockb:not(.on){border-color:var(--warn);color:var(--warn);background:color-mix(in srgb,var(--warn) 8%,var(--panel))}
-.card.modif{border-color:color-mix(in srgb,var(--warn) 55%,transparent)}
 .hint{font-size:12px;color:var(--faint);margin:6px 0 2px}
 .tagb{border:1px dashed var(--line);background:none;border-radius:99px;padding:1px 8px;font-size:11px;color:var(--faint);cursor:pointer}
 .tagb.on{border-style:solid;color:var(--text);background:var(--panel2)}
@@ -264,6 +263,26 @@ table.dept tr.an td{color:var(--muted);padding-top:2px;padding-bottom:2px}
 .mi.on{font-weight:600}
 .ns{display:flex;gap:6px;padding:4px 6px 6px}.ns .inp{flex:1}
 .brow.aut .conv{font-size:12px;color:var(--muted);white-space:nowrap;min-width:72px}
+.seg button{white-space:nowrap}
+#sess .sessb span{white-space:nowrap}
+header{flex-wrap:wrap;row-gap:8px}
+@media (max-width:1280px){#sauv .txt{display:none}#sauv button{font-size:15px;padding:5px 11px}.seg button{padding:5px 8px}header{gap:10px}.brand{font-size:14px}}
+@media (min-width:761px){.board.deux{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}}
+@media (max-width:760px){.board.deux,.board.deux.pr{grid-template-columns:1fr}}
+.num-in{width:34px;border:0;background:none;text-align:center;font:inherit;font-variant-numeric:tabular-nums;color:var(--text);padding:0;border-radius:5px}
+.num-in:focus{outline:2px solid color-mix(in srgb,var(--accent) 45%,transparent);background:var(--panel)}
+.step span{display:inline-flex;align-items:center;justify-content:center}
+.verrou{border:1.5px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:99px;padding:6px 13px;font-size:12.5px;font-weight:650;cursor:pointer;white-space:nowrap}
+.verrou:hover{color:var(--text)}
+.verrou.ferme{background:var(--bad);border-color:var(--bad);color:#fff}
+.card.verrouille{border-color:color-mix(in srgb,var(--bad) 60%,transparent)}
+.info{width:22px;height:22px;flex:none;border-radius:50%;border:1.5px solid var(--faint);background:none;color:var(--muted);font:italic 700 12px Georgia,serif;cursor:pointer;display:grid;place-items:center;padding:0}
+.info:hover{border-color:var(--accent);color:var(--accent)}
+.aide{display:grid;gap:18px;max-width:900px;margin:0 auto}
+.aide h2{font-size:18px;margin-bottom:8px}.aide p,.aide li{line-height:1.6}.aide ul{padding-left:20px;margin:6px 0}
+.aide .form{font-family:"SF Mono",ui-monospace,Menlo,monospace;background:var(--panel2);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:13px;overflow-x:auto}
+.aide table td,.aide table th{padding:6px 10px}
+.aide kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-size:12px;background:var(--panel2)}
 .lnk{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:12.5px}
 /* Étapes */
 .pills{display:flex;gap:6px;flex-wrap:wrap}
@@ -348,7 +367,7 @@ tr.tot td{font-weight:650;border-top:1.5px solid var(--line);border-bottom:0}
   <nav class="tabs" id="tabs"></nav>
   <div class="sp"></div>
   <div class="seg" id="sess" title="Session"></div>
-  <div class="seg" id="sauv"><button data-a="sauver" title="Enregistrer toutes tes données dans un fichier (Téléchargements)">⤓ Sauvegarder</button><button data-a="recup" title="Recharger un fichier de sauvegarde">⤒ Récupérer</button></div>
+  <div class="seg" id="sauv"><button data-a="sauver" title="Sauvegarder toutes tes données dans un fichier (⌘S)">⤓<span class="txt"> Sauvegarder</span></button><button data-a="recup" title="Récupérer un fichier de sauvegarde (⌘O)">⤒<span class="txt"> Récupérer</span></button></div>
   <input type="file" id="fichier" accept=".json,application/json" hidden>
   <div class="seg" id="theme"></div>
   <button class="dot" style="position:static;opacity:1;width:16px;height:16px;background:var(--accent)" data-a="pop" data-k="accent" title="Couleur principale"></button>
@@ -509,7 +528,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const f2 = x => Number(x).toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fn = x => Number(x).toLocaleString('fr-CA', { maximumFractionDigits: 2 });
 const STAT = { officiel: 'Confirmé', observe: 'Observé', estime: 'Estimé', inconnu: 'À confirmer' };
-const CAT = { principal: ['Instrument principal', 'var(--c-princ)'], complementaire: ['Instrument complémentaire', 'var(--c-comp)'], collectif: ['Cours de groupe', 'var(--c-grp)'], labo: ['Laboratoire', 'var(--c-labo)'] };
+const CAT = { principal: ['Instrument principal', 'var(--c-princ)'], labo: ['Laboratoire (instrument principal)', 'var(--c-labo)'], complementaire: ['Instrument complémentaire', 'var(--c-comp)'], collectif: ['Cours de groupe', 'var(--c-grp)'] };
 const TYPES = Object.fromEntries(Object.entries(CAT).map(([k, v]) => [k, v[0]]));
 const ORDRE = Object.keys(CAT);
 const badge = s => `<span class="chip b-${s}">${STAT[s] || s}</span>`;
@@ -620,20 +639,20 @@ function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('o
 function compteur(c, q, sid = '') {
   const n = maxDe(c), s = sid ? ` data-s="${sid}"` : '';
   if (n <= 1) return '<span class="step vide"></span>';
-  return `<div class="step"><button data-a="moins"${s} data-k="${c.id}" title="Un de moins">−</button><span>${q}<em> sur ${n}</em></span>${q < n ? `<button data-a="plus"${s} data-k="${c.id}" title="Un de plus">+</button>` : '<i class="plein" title="Tout est pris">✓</i>'}</div>`;
+  return `<div class="step"><button data-a="moins"${s} data-k="${c.id}" title="Un de moins">−</button><span><input class="num-in" value="${q}" data-ch="qte"${s} data-k="${c.id}" title="Tape un nombre"><em> sur ${n}</em></span>${q < n ? `<button data-a="plus"${s} data-k="${c.id}" title="Un de plus">+</button>` : '<i class="plein" title="Tout est pris">✓</i>'}</div>`;
 }
 let dernier = null; // dernier cours ajouté (petite animation)
 function render() {
   document.documentElement.style.setProperty('--accent', S.accent);
   if (S.theme === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = S.theme;
-  $('#tabs').innerHTML = [['cours', '1 · Cours'], ['sc', '2 · Scénarios'], ['a26', '3 · Feuilles officielles']]
+  $('#tabs').innerHTML = [['cours', '1 · Cours'], ['sc', '2 · Scénarios'], ['a26', '3 · Feuilles officielles'], ['aide', 'Aide']]
     .map(([k, t]) => `<button class="${S.tab === k ? 'on' : ''}" data-a="tab" data-k="${k}">${t}</button>`).join('');
   $('#sess').innerHTML = `<button class="on sessb" data-a="sessmenu" title="Changer de session ou en créer une"><span>${esc(ses().nom)}${ses().role ? `<small>${ses().role}</small>` : ''}</span><i>▾</i></button>`;
   $('#theme').innerHTML = [['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre']]
     .map(([k, t]) => `<button class="${S.theme === k ? 'on' : ''}" data-a="theme" data-k="${k}">${t}</button>`).join('');
   const y = scrollY, garde = {};
   document.querySelectorAll('[data-keep]').forEach(e => garde[e.dataset.keep] = e.scrollTop);
-  $('#app').innerHTML = { sc: vueScenarios, cours: vueCours, a26: vueFeuilles }[S.tab]();
+  $('#app').innerHTML = { sc: vueScenarios, cours: vueCours, a26: vueFeuilles, aide: vueAide }[S.tab]();
   scrollTo(0, y);
   document.querySelectorAll('[data-keep]').forEach(e => { if (garde[e.dataset.keep]) e.scrollTop = garde[e.dataset.keep]; });
   noter();
@@ -854,32 +873,32 @@ function vueCours() {
   const ok = c => !q || [c.code, c.abbr, c.titre, c.usage].join(' ').toLowerCase().includes(q);
   const verrou = !!ses().verrou;
   const prog = S.cours.filter(c => !off(c.id) && ok(c));
-  const ligneProg = c => `<div class="brow" style="--cat:${CAT[c.type][1]}" ${verrou ? '' : `draggable="true" data-drag="prog:${c.id}"`} data-a="edit" data-k="${c.id}" title="Cliquer pour voir ou modifier la fiche">
+  const info = c => `<button class="info" data-a="edit" data-k="${c.id}" title="Fiche du cours">i</button>`;
+  const ligneProg = c => `<div class="brow" style="--cat:${CAT[c.type][1]}" draggable="true" data-drag="prog:${c.id}" title="Glisse vers Offerts">
       <div class="nm"><b>${esc(c.abbr)}</b> ${c.statut !== 'officiel' ? badge(c.statut) : ''}<small>${esc(c.titre)}${c.code ? ' · ' + esc(c.code) : ''}${c.discipline ? ' · disc. ' + esc(discNom(c.discipline)) : ''}</small></div>
-      ${verrou ? '' : `<button class="mini" data-a="offrir" data-k="${c.id}">Offert →</button>`}</div>`;
+      ${info(c)}${verrou ? '' : `<button class="mini" data-a="offrir" data-k="${c.id}">Offert →</button>`}</div>`;
   const ligneOffre = c => {
     const o = off(c.id), coll = c.type === 'collectif', n = maxDe(c);
     const quoi = coll ? `${pl(n, 'groupe')} de ${fn(c.hg || 1)} h · ${o.n ?? '?'} étudiants par groupe` : `${pl(n, unite(c))} offert${n > 1 ? 's' : ''}`;
-    if (verrou) return `<div class="brow fixe" style="--cat:${CAT[c.type][1]}"><div class="nm"><b>${esc(c.abbr)}</b>${o.ferme ? PRIO : ''}<small>${esc(c.usage || c.titre)}${c.code ? ' · ' + esc(c.code) : ''}</small></div><span class="qte">${quoi}</span></div>`;
+    if (verrou) return `<div class="brow fixe" style="--cat:${CAT[c.type][1]}"><div class="nm"><b>${esc(c.abbr)}</b>${o.ferme ? PRIO : ''}<small>${esc(c.usage || c.titre)}${c.code ? ' · ' + esc(c.code) : ''}</small></div><span class="qte">${quoi}</span>${info(c)}</div>`;
     return `<div class="brow edit" style="--cat:${CAT[c.type][1]}" draggable="true" data-drag="offre:${c.id}">
       <div class="nm"><b>${esc(c.abbr)}</b><small>${esc(c.usage || c.titre)}</small>
-        <div class="orow"><div class="step"><button data-a="om" data-k="${c.id}" ${n <= 1 ? 'disabled' : ''}>−</button><span>${n}</span><button data-a="op" data-k="${c.id}">+</button></div><span class="sub">${coll ? `groupe${n > 1 ? 's' : ''}` : `${unite(c)}${n > 1 ? 's' : ''}`}</span>
+        <div class="orow"><div class="step"><button data-a="om" data-k="${c.id}" ${n <= 1 ? 'disabled' : ''}>−</button><span><input class="num-in" value="${n}" data-ch="onum" data-k="${c.id}" title="Tape un nombre"></span><button data-a="op" data-k="${c.id}">+</button></div><span class="sub">${coll ? `groupe${n > 1 ? 's' : ''}` : `${unite(c)}${n > 1 ? 's' : ''}`}</span>
         ${coll ? `<label class="eff"><input class="inp sm" placeholder="?" value="${o.n ?? ''}" data-ch="oeff" data-k="${c.id}"> étud./gr.</label>` : ''}
         <button class="tagb ${o.ferme ? 'on' : ''}" data-a="ferme" data-k="${c.id}" title="Ta priorité : gardée dans tes scénarios de base (ton choix, pas une règle)">priorité</button></div></div>
-      <button class="x" data-a="desoffrir" data-k="${c.id}" title="Pas offert finalement">×</button></div>`;
+      ${info(c)}<button class="x" data-a="desoffrir" data-k="${c.id}" title="Pas offert finalement">×</button></div>`;
   };
   const parType = (l, f) => ORDRE.map(t => { const x = l.filter(c => c.type === t); return x.length ? `<h3>${CAT[t][0]}</h3>${x.map(f).join('')}` : ''; }).join('');
   return `<div class="board deux ${S.progReplie ? 'pr' : ''}">
     ${S.progReplie ? `<section class="card replie" data-a="progr" title="Ouvrir le programme"><span class="cn">1</span><span class="vtxt">Programme ›</span></section>` : `<section class="card" ${cc('col-prog')} data-zone="prog">${dot('col-prog')}
       <div class="colh"><span class="cn">1</span><div style="flex:1"><h2>Programme</h2><div class="sub">Tous les cours possibles</div></div><button class="hb" data-a="progr" title="Replier le programme">‹ Replier</button></div>
       <div style="display:flex;gap:8px;margin:12px 0 4px"><input class="inp" placeholder="Chercher…" value="${esc(S.cherche || '')}" data-ch="cherche"><button class="btn" data-a="nouveau">+ Cours</button></div>
-      ${verrou ? '<div class="hint">🔒 L\'offre est verrouillée. Clique « Modifier l\'offre » pour y ajouter un cours.</div>' : ''}
+      ${verrou ? '<div class="hint">🔒 L\'offre est verrouillée. Clique la pastille « Verrouillée » pour y ajouter un cours.</div>' : ''}
       ${prog.length ? parType(prog, ligneProg) : `<div class="vide-z" style="height:120px">${q ? 'Rien trouvé.' : 'Tous les cours sont offerts.'}</div>`}
     </section>`}
-    <section class="card ${verrou ? '' : 'modif'}" ${cc('col-offre')} data-zone="offre">${dot('col-offre')}
-      <div class="colh"><span class="cn">2</span><div style="flex:1"><h2>Offerts</h2><div class="sub">L'offre officielle pour ${esc(ses().nom)} — rien à choisir ici</div></div></div>
-      <button class="lockb ${verrou ? 'on' : ''}" data-a="verrou">${verrou ? '🔒 Offre verrouillée · <u>Modifier l\'offre</u>' : '🔓 Modification de l\'offre · <u>Verrouiller</u>'}</button>
-      ${verrou ? '' : '<div class="hint">Entre exactement ce qu\'on t\'offre (feuille de la coordo), puis verrouille pour ne plus le changer par erreur.</div>'}
+    <section class="card ${verrou ? 'verrouille' : ''}" ${cc('col-offre')} data-zone="offre">${dot('col-offre')}
+      <div class="colh"><span class="cn">2</span><div style="flex:1"><h2>Offerts</h2><div class="sub">Possibilité de choix de cours pour ${esc(ses().nom)}.</div></div>
+        <button class="verrou ${verrou ? 'ferme' : ''}" data-a="verrou" title="${verrou ? 'Cliquer pour modifier l\'offre' : 'Cliquer pour verrouiller l\'offre'}">${verrou ? '🔒 Verrouillée' : '🔓 Déverrouillée'}</button></div>
       ${offerts().length ? parType(offerts(), ligneOffre) : '<div class="vide-z" style="height:160px">Glisse ici les cours qu\'on t\'offre<br>(ou « Offert → »)</div>'}
       ${offerts().length ? `<button class="btn pri" style="margin-top:16px;width:100%" data-a="tab" data-k="sc">Faire mes scénarios avec cette offre →</button>` : ''}
     </section>
@@ -941,6 +960,45 @@ function etapes(r, sc) {
   st('Pourcentage indicatif', `<span class="mono">${f2(r.ci)} ÷ ${S.cible} × 100</span><br><small>Repère seulement. Le % officiel est celui du contrat.</small>`, fn(Math.round(r.ci / S.cible * 100)) + ' %');
   st('Heures devant étudiants', `<span class="mono">${fn(r.indivH)} h individuelles + ${fn(r.HC)} h de groupe</span><br><small>${f2(r.heures ? r.ci / r.heures : 0)} CI par heure.</small>`, fn(r.heures) + ' h');
   return `<div class="steps">${S_.join('')}</div>`;
+}
+
+// ===== Onglet Aide : comment se calcule la CI =====
+function vueAide() {
+  const sec = (t, h) => `<section class="card">${'<h2>' + t + '</h2>' + h}</section>`;
+  return `<div class="aide">
+  ${sec('Le chemin dans ctmCI', `<ol>
+    <li><b>Cours</b> — tu entres l'<b>offre</b> qu'on te fait pour la session (glisse les cours du Programme vers Offerts, ou « Offert → »), puis tu la <b>verrouilles</b>.</li>
+    <li><b>Scénarios</b> — tu essaies des combinaisons à partir de l'offre. Le % et les heures se calculent en direct. <b>Comparer</b> les met côte à côte ; « Choisir ce scénario » le marque <b>✓ Mon choix</b>.</li>
+    <li><b>Feuilles officielles</b> — ton choix présenté comme la feuille du département (aperçu <kbd>⌘E</kbd>, PDF <kbd>⌘P</kbd>).</li></ol>
+    <p>Sessions : le menu en haut (ex. « Hiver 2027 · prochaine »). Tes données restent sur ton Mac ; garde une copie avec <b>Sauvegarder</b> (<kbd>⌘S</kbd>).</p>`)}
+  ${sec('La CI, en une phrase', `<p>La <b>charge individuelle (CI)</b> mesure ta tâche en unités. <b>40 CI = 100 % d'une session</b>, et le temps plein se compte sur l'<b>année : 80 CI</b> (automne + hiver). Un automne à 41,26 permet donc un hiver à 38,74.</p>
+    <div class="form">CI = instruments + laboratoire + cours de groupe + libérations</div>`)}
+  ${sec('Instruments et laboratoire : une valeur fixe', `<table><tr><th>Cours</th><th class="r">CI par heure</th></tr>
+    <tr><td>Instrument principal ou complémentaire (1 élève = 1 h)</td><td class="r"><b>1,8</b></td></tr>
+    <tr><td>Laboratoire lié à l'instrument principal</td><td class="r"><b>2,0</b></td></tr></table>
+    <p class="sub">Ces cours ne comptent pas dans le nombre de « cours différents » (le facteur F plus bas).</p>`)}
+  ${sec('Cours de groupe : trois morceaux', `<div class="form">CI = F × HP + 1,2 × HC + 0,04 × PES</div>
+    <ul><li><b>HP</b> — heures de <b>préparation</b> : comptées <b>une fois par cours différent</b>, même s'il a plusieurs groupes.</li>
+    <li><b>HC</b> — heures <b>en classe</b> par semaine, tous les groupes additionnés.</li>
+    <li><b>PES</b> — périodes-étudiants : <b>étudiants × heures</b>, pour chaque groupe. Au-delà de 415 PES, 0,07 au lieu de 0,04.</li>
+    <li><b>F</b> — le facteur de préparation, selon le nombre de cours de groupe <b>différents</b> dans la session :</li></ul>
+    <table><tr><th>Cours de groupe différents</th><th class="r">F</th></tr><tr><td>1 ou 2</td><td class="r">0,9</td></tr><tr><td>3</td><td class="r">1,1</td></tr><tr><td>4 ou plus</td><td class="r">1,75</td></tr></table>
+    <p>Le facteur s'applique à <b>toutes</b> tes heures de préparation : ajouter un 3<sup>e</sup> cours de groupe fait aussi monter les autres (ctmCI l'indique sous le bouton « + Ajouter »). Un cours à distance compte comme différent du même cours en présence.</p>`)}
+  ${sec('Exemples (tes feuilles)', `<div class="form">ENS AJ (2 groupes de 1 h, 2 étudiants chacun) = 0,9 × 1 + 1,2 × 2 + 0,04 × 4 = 3,46</div>
+    <div class="form">Automne 2026 = 21 h d'instrument × 1,8 + ENS AJ 3,46 = 41,26 CI (103 %)</div>
+    <p class="sub">Une heure de groupe rapporte plus qu'une heure d'instrument (environ 2,3 à 2,8 CI contre 1,8), surtout quand elle fait monter F.</p>`)}
+  ${sec('Libérations et autres éléments', `<div class="form">CIL = L × 40      (ex. libération de 20 % = 8 CI)</div>
+    <ul><li><b>Coordination</b> (départementale, de programme) : un nombre de CI donné par le département.</li>
+    <li><b>PVRTT</b> — programme volontaire de réduction du temps de travail (convention, art. 5-14) : dès 3 ans d'ancienneté ; tâche annuelle entre 0,4 et 0,9 (réduction de 10 à 60 %) ; une seule session : au plus 80 % ; salaire réduit d'autant, ancienneté gardée. Demande écrite avant le <b>15 mai</b> (automne ou année) ou le <b>15 novembre</b> (hiver).</li></ul>`)}
+  ${sec('Ce que ctmCI ne calcule pas', `<ul><li>Les termes pour les très gros groupes (NES ≥ 75), les stages et les temps de déplacement de l'annexe I-1.</li>
+    <li>Les abandons, annulations et inscriptions en cours de session : la CI officielle est établie au 20 septembre (automne) ou au 15 février (hiver).</li>
+    <li>Le % au contrat et les règles d'attribution du département.</li></ul>
+    <p><b>ctmCI est une simulation pour comprendre. La feuille officielle du département fait foi.</b></p>`)}
+  ${sec('Raccourcis', `<table>
+    <tr><td><kbd>⌘Z</kbd> / <kbd>⇧⌘Z</kbd></td><td>Annuler / rétablir</td></tr><tr><td><kbd>⌘E</kbd></td><td>Aperçu de la feuille</td></tr>
+    <tr><td><kbd>⌘P</kbd></td><td>Imprimer / PDF</td></tr><tr><td><kbd>⌘S</kbd> / <kbd>⌘O</kbd></td><td>Sauvegarder / récupérer (app)</td></tr></table>
+    <p class="sub">Sources : convention collective FNEEQ-CSN 2023-2028 (annexe I-1, art. 5-14), Entente en musique, feuilles A26 du département.</p>`)}
+  </div>`;
 }
 
 // ===== Feuilles officielles : mon choix, présenté comme la feuille du département =====
@@ -1203,6 +1261,8 @@ document.addEventListener('change', e => {
   else if (d.ch === 'garde') { const v = num(t.value); ses().garde = v == null ? 100 : Math.max(1, Math.min(100, v)); }
   else if (d.ch === 'autlib') sc.autres[+d.i].lib = t.value;
   else if (d.ch === 'autval') { const a = sc.autres[+d.i]; a[a.unite === 'pct' ? 'pct' : 'ci'] = num(t.value) ?? ''; }
+  else if (d.ch === 'onum') { const c = cours(d.k), o = off(d.k), f = c.type === 'collectif' ? 'gr' : 'n', v = Math.round(num(t.value)); if (v >= 1) o[f] = v; }
+  else if (d.ch === 'qte') { const c = cours(d.k), v = Math.round(num(t.value)); if (!isNaN(v)) { sc.sel[d.k] = Math.max(0, Math.min(maxDe(c), v)); if (!sc.sel[d.k] && c.lien) sc.sel[c.lien] = 0; } }
   else if (d.ch === 'scnom') sc.nom = t.value;
   else if (d.ch === 'fmode') sc.fMode = t.value;
   else if (d.ch === 'fman') sc.fManuel = num(t.value) ?? '';

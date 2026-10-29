@@ -1,7 +1,7 @@
 {
   "name": "ctmci",
   "productName": "ctmCI",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ctmCI — calculateur de charge individuelle (CI) pour comprendre sa tâche au cégep",
   "main": "main.js",
   "author": "Charles Trudel",
