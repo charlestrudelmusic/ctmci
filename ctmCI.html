@@ -284,6 +284,8 @@ header{flex-wrap:wrap;row-gap:8px}
 .aide table td,.aide table th{padding:6px 10px}
 .aide kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-size:12px;background:var(--panel2)}
 .f-qui{display:flex;gap:22px;flex-wrap:wrap;font-weight:600;margin-bottom:10px}.f-qui span:first-child{font-size:16px}
+.garde .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600}
+.garde .expl{flex:1;min-width:240px}.garde .ciaut{display:flex;align-items:center;gap:6px;white-space:nowrap}
 .lnk{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:12.5px}
 /* Étapes */
 .pills{display:flex;gap:6px;flex-wrap:wrap}
@@ -571,10 +573,29 @@ function calcSes(x, sc) { const k = S.sess; S.sess = x.id; try { return calc(sc)
 // Les autres sessions de la même année : CI de leur choix (« Mon choix »), ou rien si pas encore choisi
 function autresAnnee() {
   const a = ses().annee; if (!a) return [];
-  return S.sessions.filter(x => x !== ses() && x.annee === a).map(x => { const sc = x.scenarios.find(s => s.id === x.retenu); return { nom: x.nom, ci: sc ? calcSes(x, sc).ci : null }; });
+  return S.sessions.filter(x => x !== ses() && x.annee === a).map(x => {
+    const sc = x.scenarios.find(s => s.id === x.retenu), off = x.ciOff != null && x.ciOff !== '';
+    return { id: x.id, nom: x.nom, ci: off ? Number(x.ciOff) : sc ? calcSes(x, sc).ci : null, source: off ? 'feuille officielle' : sc ? 'mon choix' : '' };
+  });
 }
 const modeAnnee = () => S.cibleMode !== 'session' && autresAnnee().some(x => x.ci != null);
 // CI visée dans cette session : l'année (80 − les autres sessions) ou la session seule (40), × % gardé
+// La ligne « Objectif » : année ou session, le calcul en clair, la CI des autres sessions, et « Scinder » au besoin
+function ligneObjectif() {
+  const aut = autresAnnee(), annee = S.cibleMode !== 'session', g = garde(), plein = 2 * S.cible * g / 100;
+  const champCI = x => `<label class="ciaut">${esc(x.nom)} : <input class="inp sm" value="${x.ci == null ? '' : fn(x.ci)}" placeholder="?" data-ch="ciOff" data-k="${x.id}" title="CI de ta feuille officielle pour cette session"> CI</label>`;
+  let expl;
+  if (!aut.length) expl = `Il te faut <b>${f2(cibleS())} CI</b> cette session.`;
+  else if (!annee) expl = `Objectif : 100 % de <b>cette session</b> → <b>${f2(cibleS())} CI</b>.`;
+  else if (modeAnnee()) expl = `Temps plein sur l'année = ${fn(plein)} CI. ${aut.map(x => `${esc(x.nom)} : ${f2(x.ci)}${x.source ? ` <span class="sub">(${x.source})</span>` : ''}`).join(' + ')} → il te faut <b>${f2(cibleS())} CI</b> cette session.`;
+  else expl = `Pour viser l'année, entre la CI de ${aut.map(x => esc(x.nom)).join(', ')} (ta feuille officielle). En attendant : <b>${f2(cibleS())} CI</b>.`;
+  return `<div class="garde">
+    ${aut.length ? `<span class="lbl">Objectif</span><div class="seg vseg" style="margin:0"><button class="${annee ? 'on' : ''}" data-a="cmode" data-k="annee" title="Le temps plein se compte sur l'année : ${fn(plein)} CI (automne + hiver)">100 % sur l'année</button><button class="${annee ? '' : 'on'}" data-a="cmode" data-k="session">100 % de cette session</button></div>` : ''}
+    <span class="expl">${expl}</span>
+    ${aut.length && annee ? aut.map(champCI).join('') : ''}
+    ${g < 100 || S.voirScinder ? `<label class="ciaut" title="Si tu scindes ta tâche pour enseigner aussi dans un autre cégep">Je garde <input class="inp sm" value="${fn(g)}" data-ch="garde"> % de ma tâche ici</label>` : `<button class="lnk" data-a="scinder">Scinder ma tâche…</button>`}
+  </div>`;
+}
 function cibleS() {
   const base = S.cible * garde() / 100;
   if (!modeAnnee()) return base;
@@ -627,7 +648,7 @@ const selFermes = () => Object.fromEntries(offerts().filter(c => off(c.id).ferme
 
 // ===== Affichage =====
 // ===== Annuler ⌘Z / Rétablir ⇧⌘Z (données seulement, pas l'onglet ou l'affichage) =====
-const VUE = ['cibleMode', 'vueBlocs', 'progReplie', 'tab', 'comp', 'calcOuvert', 'cherche', 'autres', 'ajusterF', 'a26v', 'sess'];
+const VUE = ['voirScinder', 'cibleMode', 'vueBlocs', 'progReplie', 'tab', 'comp', 'calcOuvert', 'cherche', 'autres', 'ajusterF', 'a26v', 'sess'];
 const photo = () => JSON.stringify(S, (k, v) => VUE.includes(k) ? undefined : v);
 let hist = [], futur = [], actuel = null;
 function noter() { const p = photo(); if (actuel !== null && p !== actuel) { hist.push(actuel); if (hist.length > 200) hist.shift(); futur = []; } actuel = p; }
@@ -763,9 +784,7 @@ function constructeur(sc) {
     <div style="display:flex;gap:10px;align-items:center;padding-right:18px"><span class="chip" style="font-weight:700">Scénario ${noSc(sc)}</span><input class="ttl-in" value="${esc(sc.nom)}" data-ch="scnom" data-s="${sc.id}" placeholder="Nom du scénario" title="Clique pour renommer">
       <div class="hacts">${ses().retenu === sc.id ? `<button class="choix gros" data-a="retenir" data-s="${sc.id}" title="Cliquer pour annuler ce choix">✓ Mon choix</button>` : `<button class="hb" data-a="retenir" data-s="${sc.id}">Choisir ce scénario</button>`}
         <button class="hb" data-a="dup" data-s="${sc.id}">⧉ Dupliquer</button>${scs().length > 1 ? `<button class="hb del" data-a="del" data-s="${sc.id}">Supprimer</button>` : ''}</div></div>
-    <div class="garde">${autresAnnee().length ? `<div class="seg vseg" style="margin:0" title="Le temps plein se calcule sur l'année : 80 CI pour automne + hiver"><button class="${S.cibleMode !== 'session' ? 'on' : ''}" data-a="cmode" data-k="annee">Viser l'année</button><button class="${S.cibleMode === 'session' ? 'on' : ''}" data-a="cmode" data-k="session">Viser la session</button></div>` : ''}
-      <label title="Si tu fais scinder ta tâche (autre cégep) : le % que tu gardes ici">Tâche gardée ici <input class="inp sm" value="${fn(garde())}" data-ch="garde"> %</label>
-      <span class="sub">${modeAnnee() ? `Année ${esc(ses().annee)} : ${autresAnnee().map(x => `${esc(x.nom)} ${x.ci == null ? '(pas encore choisie)' : f2(x.ci)}`).join(' + ')} → il te faut <b>${f2(cibleS())} CI</b> cette session pour ${fn(garde())} % sur l'année` : garde() < 100 ? `soit ${f2(cibleS())} CI · le reste (${f2(S.cible - cibleS())} CI) irait à quelqu'un d'autre` : `cible : ${f2(cibleS())} CI cette session`}</span></div>
+    ${ligneObjectif()}
     ${jauge(r)}
     ${avert.join('')}
   </section>
@@ -1255,6 +1274,7 @@ document.addEventListener('click', e => {
     case 'autu': { const a = sc.autres[+t.dataset.i], c = ciAut(a); a.unite = k; if (k === 'pct') a.pct = rond(c / S.cible * 100); else a.ci = c; break; }
     case 'autdel': sc.autres.splice(+t.dataset.i, 1); break;
     case 'cmode': S.cibleMode = k; break;
+    case 'scinder': S.voirScinder = true; break;
     case 'sauver': return sauver();
     case 'recup': return $('#fichier').click();
     case 'progr': S.progReplie = !S.progReplie; break;
@@ -1284,6 +1304,7 @@ document.addEventListener('change', e => {
   else if (d.ch === 'onum') { const c = cours(d.k), o = off(d.k), f = c.type === 'collectif' ? 'gr' : 'n', v = Math.round(num(t.value)); if (v >= 1) o[f] = v; }
   else if (d.ch === 'qte') { const c = cours(d.k), v = Math.round(num(t.value)); if (!isNaN(v)) { sc.sel[d.k] = Math.max(0, Math.min(maxDe(c), v)); if (!sc.sel[d.k] && c.lien) sc.sel[c.lien] = 0; } }
   else if (d.ch === 'fiche') { (S.fiche = S.fiche || {})[d.k] = t.value.trim(); }
+  else if (d.ch === 'ciOff') { const x = S.sessions.find(z => z.id === d.k); if (x) { const v = num(t.value); x.ciOff = v == null || isNaN(v) ? '' : v; } }
   else if (d.ch === 'scnom') sc.nom = t.value;
   else if (d.ch === 'fmode') sc.fMode = t.value;
   else if (d.ch === 'fman') sc.fManuel = num(t.value) ?? '';
